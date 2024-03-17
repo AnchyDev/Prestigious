@@ -1,5 +1,7 @@
 #include "PrestigiousNPC.h"
 
+#include "Chat.h"
+#include "GameTime.h"
 #include "Player.h"
 #include "ScriptedGossip.h"
 
@@ -70,11 +72,18 @@ void PrestigiousNPCScript::DoPrestige(Player* player)
     uint32 pClass = player->getClass();
     uint32 isHeroClass = pClass == CLASS_DEATH_KNIGHT;
 
+    // Lock the character incase the player tries relogging
     LockCharacter(guid);
 
-    // Kick the player to start the prestige process.
-    player->GetSession()->LogoutPlayer(true);
+    ChatHandler(player->GetSession()).SendSysMessage("|cffFFFFFF[Prestige]: |cff00FF00Prestiging character, please wait..|r");
 
+    // Freeze the character in its current position
+    player->AddAura(SPELL_FREEZE, player);
+
+    // Save the current player state to DB
+    player->SaveToDB(false, false);
+
+    // Start prestige process
     ResetLevel(guid, isHeroClass);
     ResetSpells(guid);
     ResetQuests(guid);
@@ -82,7 +91,30 @@ void PrestigiousNPCScript::DoPrestige(Player* player)
 
     StoreAllItems(guid);
 
+    // Unlock the character
     UnlockCharacter(guid);
+
+    ChatHandler(player->GetSession()).SendSysMessage("|cffFFFFFF[Prestige]: |cff00FF00Prestige complete, logging out..|r");
+
+
+    // TODO: THIS CRASHES WORLDSERVER
+    scheduler.Schedule(3s, [player](TaskContext /*context*/)
+    {
+        if (!player ||
+            !player->GetSession() ||
+            !player->IsInWorld())
+        {
+            return;
+        }
+
+        // Unfreeze the character
+        player->RemoveAura(SPELL_FREEZE);
+
+        player->GetSession()->SetLogoutStartTime(GameTime::GetGameTime().count());
+
+        // Log the player out without saving
+        player->GetSession()->LogoutPlayer(false);
+    });
 }
 
 void PrestigiousNPCScript::LockCharacter(ObjectGuid guid)
@@ -201,11 +233,34 @@ void PrestigiousNPCScript::ResetHomebindAndPosition(ObjectGuid guid, uint32 pRac
 
 void PrestigiousNPCScript::StoreAllItems(ObjectGuid guid)
 {
-    // TODO: Save these item guids to a separate table to be able to retrieve them at max level via mail.
+    // Save these item guids to a separate table to be able to retrieve them at max level via mail.
+    {
+        QueryResult result = CharacterDatabase.Query("SELECT item FROM character_inventory WHERE guid = {}", guid.GetRawValue());
+
+        if (!result)
+        {
+            return;
+        }
+
+        do
+        {
+            auto fields = result->Fetch();
+
+            auto itemGuid = fields[0].Get<uint32>();
+
+            CharacterDatabase.Execute("INSERT INTO prestige_backup_inventory (player_guid, item_guid) VALUES ({}, {})", guid.GetRawValue(), itemGuid);
+        } while (result->NextRow());
+    }
+
     // Clean all references to items in inventory (bags, bank, etc..)
     {
         CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_INVENTORY);
         stmt->SetData(0, guid.GetCounter());
         CharacterDatabase.Execute(stmt);
     }
+}
+
+void PrestigiousNPCScript::OnUpdate(Creature* /*obj*/, uint32 diff)
+{
+    scheduler.Update(diff);
 }

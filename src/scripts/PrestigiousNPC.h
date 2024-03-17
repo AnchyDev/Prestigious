@@ -2,6 +2,7 @@
 #define MODULE_PRESTIGIOUS_NPC_H
 
 #include "ScriptMgr.h"
+#include "TaskScheduler.h"
 
 class PrestigiousNPCScript : public CreatureScript
 {
@@ -25,13 +26,19 @@ private:
 
     void StoreAllItems(ObjectGuid /*guid*/);
 
+    void OnUpdate(Creature* /*obj*/, uint32 /*diff*/) override;
+
 private:
     enum PrestigiousConstants {
         PRESTIGE_DO_PRESTIGE = 1,
 
         PRESTIGE_TEXT_CANNOT_PRESTIGE = 555123,
-        PRESTIGE_TEXT_CAN_PRESTIGE = 555124
+        PRESTIGE_TEXT_CAN_PRESTIGE = 555124,
+
+        SPELL_FREEZE = 9454
     };
+
+    TaskScheduler scheduler;
 };
 
 #endif // MODULE_PRESTIGIOUS_NPC_H
