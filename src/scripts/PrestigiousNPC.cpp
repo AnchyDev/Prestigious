@@ -80,7 +80,7 @@ void PrestigiousNPCScript::DoPrestige(Player* player)
     ResetQuests(guid);
     ResetHomebindAndPosition(guid, pRace, pClass);
 
-    StoreBankItems(guid);
+    StoreAllItems(guid);
 
     UnlockCharacter(guid);
 }
@@ -199,7 +199,7 @@ void PrestigiousNPCScript::ResetHomebindAndPosition(ObjectGuid guid, uint32 pRac
     CharacterDatabase.Execute(stmt);
 }
 
-void PrestigiousNPCScript::StoreBankItems(ObjectGuid guid)
+void PrestigiousNPCScript::StoreAllItems(ObjectGuid guid)
 {
     // TODO: Save these item guids to a separate table to be able to retrieve them at max level via mail.
     // Clean all references to items in inventory (bags, bank, etc..)
