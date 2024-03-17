@@ -44,7 +44,9 @@ bool PrestigiousNPCScript::CanPrestige(Player* player)
         return false;
     }
 
-    if (player->GetLevel() < 80)
+    auto maxLevel = sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL);
+
+    if (player->GetLevel() < maxLevel)
     {
         return false;
     }
