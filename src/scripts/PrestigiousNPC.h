@@ -23,6 +23,8 @@ private:
     void ResetQuests(ObjectGuid /*guid*/);
     void ResetHomebindAndPosition(ObjectGuid /*guid*/, uint32 /*race*/, uint32 /*class*/);
 
+    void StoreBankItems(ObjectGuid /*guid*/);
+
 private:
     enum PrestigiousConstants {
         PRESTIGE_DO_PRESTIGE = 1,
