@@ -38,18 +38,23 @@ void PrestigeHandler::DoPrestige(Player* player)
     LockCharacter(guid);
 
     // Save the current player state to DB and logout.
-    player->GetSession()->LogoutPlayer(true);
+    player->SaveToDB(false, false);
+    player->GetSession()->LogoutPlayer(false);
 
-    // Start prestige process
-    ResetLevel(guid, isHeroClass);
-    ResetSpells(guid);
-    ResetQuests(guid);
-    ResetHomebindAndPosition(guid, pRace, pClass);
+    // Schedule for later in the future in the case of race condition.
+    Scheduler.Schedule(3s, [this, guid, isHeroClass, pRace, pClass](TaskContext context)
+    {
+        // Start prestige process
+        ResetLevel(guid, isHeroClass);
+        ResetSpells(guid);
+        ResetQuests(guid);
+        ResetHomebindAndPosition(guid, pRace, pClass);
 
-    StoreAllItems(guid);
+        StoreAllItems(guid);
 
-    // Unlock the character
-    UnlockCharacter(guid);
+        // Unlock the character
+        UnlockCharacter(guid);
+    });
 }
 
 void PrestigeHandler::LockCharacter(ObjectGuid guid)

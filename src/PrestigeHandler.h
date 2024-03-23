@@ -2,6 +2,7 @@
 #define MODULE_PRESTIGIOUS_HANDLER_H
 
 #include "Player.h"
+#include "TaskScheduler.h"
 
 class PrestigeHandler
 {
@@ -28,6 +29,9 @@ public:
     void ResetHomebindAndPosition(ObjectGuid /*guid*/, uint32 /*race*/, uint32 /*class*/);
 
     void StoreAllItems(ObjectGuid /*guid*/);
+
+public:
+    TaskScheduler Scheduler;
 };
 
 #define sPrestigeHandler PrestigeHandler::GetInstance()
