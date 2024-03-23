@@ -32,6 +32,7 @@ void PrestigeHandler::DoPrestige(Player* player)
 
     uint32 pRace = player->getRace();
     uint32 pClass = player->getClass();
+    uint32 pGender = player->getGender();
     uint32 isHeroClass = pClass == CLASS_DEATH_KNIGHT;
 
     // Lock the character incase the player tries relogging
@@ -41,8 +42,9 @@ void PrestigeHandler::DoPrestige(Player* player)
     player->SaveToDB(false, false);
     player->GetSession()->LogoutPlayer(false);
 
+    // TODO: I should detect the end of the transaction instead of just queueing it for the future to prevent race conditions.
     // Schedule for later in the future in the case of race condition.
-    Scheduler.Schedule(3s, [this, guid, isHeroClass, pRace, pClass](TaskContext context)
+    Scheduler.Schedule(3s, [this, guid, isHeroClass, pRace, pClass, pGender](TaskContext context)
     {
         // Start prestige process
         ResetLevel(guid, isHeroClass);
@@ -51,6 +53,7 @@ void PrestigeHandler::DoPrestige(Player* player)
         ResetHomebindAndPosition(guid, pRace, pClass);
 
         StoreAllItems(guid);
+        AddDefaultItems(guid, pRace, pClass, pGender);
 
         // Unlock the character
         UnlockCharacter(guid);
@@ -148,7 +151,7 @@ void PrestigeHandler::ResetQuests(ObjectGuid guid)
     LOG_INFO("module", "Prestige> Player quest status reset.");
 }
 
-void PrestigeHandler::ResetHomebindAndPosition(ObjectGuid guid, uint32 pRace, uint32 pClass)
+void PrestigeHandler::ResetHomebindAndPosition(ObjectGuid guid, uint8 pRace, uint8 pClass)
 {
     LOG_INFO("module", "Prestige> Resetting player homebind and position..");
 
@@ -229,4 +232,27 @@ void PrestigeHandler::StoreAllItems(ObjectGuid guid)
     }
 
     LOG_INFO("module", "Prestige> Player items reset.");
+}
+
+void PrestigeHandler::AddDefaultItems(ObjectGuid guid, uint8 pRace, uint8 pClass, uint8 pGender)
+{
+    auto startOutfit = GetCharStartOutfitEntry(pRace, pClass, pGender);
+
+    for (uint8 i = 0; i < MAX_OUTFIT_ITEMS; ++i)
+    {
+        auto itemEntry = startOutfit->ItemId[i];
+
+        if (!itemEntry ||
+            itemEntry == -1)
+        {
+            continue;
+        }
+
+        auto item = Item::CreateItem(itemEntry, 1);
+        auto itemGuid = item->GetGUID();
+
+        LOG_INFO("module", "Created default item {} with guid {}.", item->GetTemplate()->Name1, itemGuid.GetCounter());
+    }
+
+    // TODO: Add the items to play.
 }
