@@ -178,7 +178,22 @@ void PrestigeHandler::DeleteItems(Player* player)
         player->RemoveItem(INVENTORY_SLOT_BAG_0, i, true);
     }
 
-    // TODO: Clean bank, keychain, additional bags, etc..
+    // Delete items from the main bank slots
+    for (uint32 i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; ++i)
+    {
+        player->RemoveItem(INVENTORY_SLOT_BAG_0, i, true);
+    }
+
+    // Delete items from the additional bank bag slots
+    for (uint32 i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; ++i)
+    {
+        auto bag = player->GetBagByPos(i);
+
+        for (uint32 j = 0; j < bag->GetBagSize(); ++j)
+        {
+            player->RemoveItem(i, j, true);
+        }
+    }
 
     LOG_INFO("module", "Prestige> Player items were deleted.");
 }
