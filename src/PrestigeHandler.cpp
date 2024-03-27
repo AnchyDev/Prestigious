@@ -30,6 +30,7 @@ void PrestigeHandler::DoPrestige(Player* player)
     ResetLevel(player);
     //ResetSpells(player);
     ResetQuests(player);
+    ResetHomebindAndPosition(player);
 }
 
 void PrestigeHandler::LockCharacter(ObjectGuid guid)
@@ -128,50 +129,30 @@ void PrestigeHandler::ResetQuests(Player* player)
     LOG_INFO("module", "Prestige> Player quest status reset.");
 }
 
-void PrestigeHandler::ResetHomebindAndPosition(ObjectGuid guid, uint8 pRace, uint8 pClass)
+void PrestigeHandler::ResetHomebindAndPosition(Player* player)
 {
     LOG_INFO("module", "Prestige> Resetting player homebind and position..");
 
-    QueryResult result = WorldDatabase.Query("SELECT map, zone, position_x, position_y, position_z, orientation FROM playercreateinfo WHERE race = {} AND class = {}", pRace, pClass);
+    auto playerInfo = sObjectMgr->GetPlayerInfo(player->getRace(), player->getClass());
 
-    if (!result)
+    WorldLocation worldLoc(playerInfo->mapId, playerInfo->positionX, playerInfo->positionY, playerInfo->positionZ, playerInfo->orientation);
+
+    player->SetHomebind(worldLoc, playerInfo->areaId);
+
+    // Update Hearthstone binding point for UI
     {
-        LOG_INFO("module", "Prestige> No default homebind position found, skipping..");
-        return;
+        WorldPacket data(SMSG_BINDPOINTUPDATE, 4 + 4 + 4 + 4 + 4);
+
+        data << float(worldLoc.GetPositionX());
+        data << float(worldLoc.GetPositionY());
+        data << float(worldLoc.GetPositionZ());
+        data << uint32(worldLoc.GetMapId());
+        data << uint32(playerInfo->areaId);
+
+        player->SendDirectMessage(&data);
     }
 
-    auto fields = result->Fetch();
-
-    auto mapId = fields[0].Get<uint32>();
-    auto zoneId = fields[1].Get<uint32>();
-    auto posX = fields[2].Get<float>();
-    auto posY = fields[3].Get<float>();
-    auto posZ = fields[4].Get<float>();
-    auto posO = fields[5].Get<float>();
-
-    CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_PLAYER_HOMEBIND);
-    stmt->SetData(0, guid.GetCounter());
-    CharacterDatabase.Execute(stmt);
-
-    stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_PLAYER_HOMEBIND);
-    stmt->SetData(0, guid.GetCounter());
-    stmt->SetData(1, mapId);
-    stmt->SetData(2, zoneId);
-    stmt->SetData(3, posX);
-    stmt->SetData(4, posY);
-    stmt->SetData(5, posZ);
-    stmt->SetData(6, posO);
-    CharacterDatabase.Execute(stmt);
-
-    stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHARACTER_POSITION);
-    stmt->SetData(0, posX);
-    stmt->SetData(1, posY);
-    stmt->SetData(2, posZ);
-    stmt->SetData(3, posO);
-    stmt->SetData(4, mapId);
-    stmt->SetData(5, zoneId);
-    stmt->SetData(6, guid.GetCounter());
-    CharacterDatabase.Execute(stmt);
+    player->TeleportTo(worldLoc);
 
     LOG_INFO("module", "Prestige> Player homebind and position reset.");
 }

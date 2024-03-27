@@ -26,7 +26,7 @@ public:
     void ResetLevel(Player* /*player*/);
     void ResetSpells(Player* /*player*/);
     void ResetQuests(Player* /*player*/);
-    void ResetHomebindAndPosition(ObjectGuid /*guid*/, uint8 /*race*/, uint8 /*class*/);
+    void ResetHomebindAndPosition(Player* /*player*/);
 
     /// <summary>
     /// Stored all the items in player inventory, bank, keychain, etc.. into void to be retrieved later.
