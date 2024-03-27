@@ -27,11 +27,6 @@ public:
 
     void DeleteItems(Player* /*player*/);
     void EquipDefaultItems(Player* /*player*/);
-
-    int32 InventoryTypeToEquipSlot(uint32 /*invType*/);
-
-public:
-    TaskScheduler Scheduler;
 };
 
 #define sPrestigeHandler PrestigeHandler::GetInstance()
