@@ -105,12 +105,20 @@ void PrestigeHandler::ResetQuests(Player* player)
     player->ResetWeeklyQuestStatus();
     player->ResetMonthlyQuestStatus();
 
+    // Reset all previously completed quests
     auto quests = player->getRewardedQuests();
     for (auto& quest : quests)
     {
+        if (!quest)
+        {
+            continue;
+        }
+
         player->SetQuestStatus(quest, QUEST_STATUS_NONE, true);
+        player->RemoveRewardedQuest(quest, true);
     }
 
+    // Purge quest log
     for (auto questSlot = 0; questSlot < MAX_QUEST_LOG_SIZE; questSlot++)
     {
         auto quest = player->GetQuestSlotQuestId(questSlot);
@@ -123,7 +131,9 @@ void PrestigeHandler::ResetQuests(Player* player)
         player->AbandonQuest(quest);
         player->RemoveActiveQuest(quest, true);
         player->RemoveTimedAchievement(ACHIEVEMENT_TIMED_TYPE_QUEST, quest);
+
         player->SetQuestSlot(questSlot, 0);
+        player->SetQuestSlotState(questSlot, QUEST_STATE_NONE);
     }
 
     LOG_INFO("module", "Prestige> Player quest status reset.");
