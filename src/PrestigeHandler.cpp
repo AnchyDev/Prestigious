@@ -28,7 +28,7 @@ void PrestigeHandler::DoPrestige(Player* player)
     }
 
     ResetLevel(player);
-    //ResetSpells(player);
+    ResetSpells(player);
     ResetQuests(player);
     ResetHomebindAndPosition(player);
 
@@ -160,6 +160,11 @@ void PrestigeHandler::DeleteItems(Player* player)
     {
         auto bag = player->GetBagByPos(i);
 
+        if (!bag)
+        {
+            continue;
+        }
+
         for (uint32 j = 0; j < bag->GetBagSize(); ++j)
         {
             player->RemoveItem(i, j, true);
@@ -188,6 +193,11 @@ void PrestigeHandler::DeleteItems(Player* player)
     for (uint32 i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; ++i)
     {
         auto bag = player->GetBagByPos(i);
+
+        if (!bag)
+        {
+            continue;
+        }
 
         for (uint32 j = 0; j < bag->GetBagSize(); ++j)
         {
