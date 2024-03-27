@@ -172,6 +172,12 @@ void PrestigeHandler::DeleteItems(Player* player)
         player->RemoveItemFromBuyBackSlot(i, true);
     }
 
+    // Delete items from the keyring
+    for (uint32 i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; ++i)
+    {
+        player->RemoveItem(INVENTORY_SLOT_BAG_0, i, true);
+    }
+
     // TODO: Clean bank, keychain, additional bags, etc..
 
     LOG_INFO("module", "Prestige> Player items were deleted.");
