@@ -166,6 +166,12 @@ void PrestigeHandler::DeleteItems(Player* player)
         }
     }
 
+    // Delete items from the buyback tab
+    for (uint32 i = BUYBACK_SLOT_START; i < BUYBACK_SLOT_END; ++i)
+    {
+        player->RemoveItemFromBuyBackSlot(i, true);
+    }
+
     // TODO: Clean bank, keychain, additional bags, etc..
 
     LOG_INFO("module", "Prestige> Player items were deleted.");
