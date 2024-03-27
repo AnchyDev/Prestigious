@@ -66,6 +66,78 @@ void PrestigeHandler::ResetSpells(Player* player)
     player->LearnDefaultSkills();
     player->LearnCustomSpells();
 
+    // Learn default starter spells
+    {
+        auto classEntry = sChrClassesStore.LookupEntry(player->getClass());
+
+        if (!classEntry)
+        {
+            LOG_WARN("module", "Prestige> Failed to load class entry for player {}.", player->GetName());
+            return;
+        }
+
+        auto spellFamily = classEntry->spellfamily;
+
+        for (auto it = sSkillLineAbilityStore.begin(); it != sSkillLineAbilityStore.end(); ++it)
+        {
+            if (it->AcquireMethod != 2)
+            {
+                continue;
+            }
+
+            if (it->RaceMask != 0 &&
+                (it->RaceMask & player->getRaceMask()) != player->getRaceMask())
+            {
+                continue;
+            }
+
+            if (it->ClassMask != 0 &&
+                (it->ClassMask & player->getClassMask()) != player->getClassMask())
+            {
+                continue;
+            }
+
+            if (!player->IsSpellFitByClassAndRace(it->Spell))
+            {
+                continue;
+            }
+
+            auto spellInfo = sSpellMgr->GetSpellInfo(it->Spell);
+
+            if (spellInfo->SpellLevel == 0)
+            {
+                continue;
+            }
+
+            if (spellInfo->SpellFamilyName != spellFamily)
+            {
+                continue;
+            }
+
+            if (!SpellMgr::IsSpellValid(spellInfo))
+            {
+                continue;
+            }
+
+            LOG_INFO("module", "Prestige> Learning spell {}:{}", it->Spell, spellInfo->SpellName[0]);
+
+            player->learnSpell(it->Spell);
+        }
+    }
+
+    auto playerInfo = sObjectMgr->GetPlayerInfo(player->getRace(), player->getClass());
+    if (!playerInfo)
+    {
+        LOG_WARN("module", "Prestige> Failed to load player information for player {}.", player->GetName());
+        return;
+    }
+
+    // Re-cast spells like blood presence / battle stance
+    for (auto& castSpell : playerInfo->castSpells)
+    {
+        player->CastSpell(player, castSpell, true);
+    }
+
     LOG_INFO("module", "Prestige> Player spells reset.");
 }
 
