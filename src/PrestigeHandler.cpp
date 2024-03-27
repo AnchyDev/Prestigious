@@ -148,7 +148,7 @@ void PrestigeHandler::DeleteItems(Player* player)
     }
 
     // Delete default bag items
-    for (uint32 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    for (uint32 i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
     {
         player->RemoveItem(INVENTORY_SLOT_BAG_0, i, true);
     }
