@@ -20,28 +20,13 @@ public:
     bool CanPrestige(Player* /*player*/);
     void DoPrestige(Player* /*player*/);
 
-    void LockCharacter(ObjectGuid /*guid*/);
-    void UnlockCharacter(ObjectGuid /*guid*/);
-
     void ResetLevel(Player* /*player*/);
     void ResetSpells(Player* /*player*/);
     void ResetQuests(Player* /*player*/);
     void ResetHomebindAndPosition(Player* /*player*/);
 
-    /// <summary>
-    /// Stored all the items in player inventory, bank, keychain, etc.. into void to be retrieved later.
-    /// </summary>
-    /// <param name="guid">The player globally unique identifier (guid).</param>
-    void StoreAllItems(ObjectGuid /*guid*/);
-
-    /// <summary>
-    /// Adds the default starting items to the player.
-    /// </summary>
-    /// <param name="guid">The player globally unique identifier (guid).</param>
-    /// <param name="pRace">The player characters race.</param>
-    /// <param name="pClass">The player characters class.</param>
-    /// <param name="pGender">The player characters gender.</param>
-    void AddDefaultItems(ObjectGuid /*guid*/, uint8 /*pRace*/, uint8 /*pClass*/, uint8 /*pGender*/);
+    void DeleteItems(Player* /*player*/);
+    void EquipDefaultItems(Player* /*player*/);
 
     int32 InventoryTypeToEquipSlot(uint32 /*invType*/);
 

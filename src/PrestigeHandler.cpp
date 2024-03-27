@@ -31,39 +31,9 @@ void PrestigeHandler::DoPrestige(Player* player)
     //ResetSpells(player);
     ResetQuests(player);
     ResetHomebindAndPosition(player);
-}
 
-void PrestigeHandler::LockCharacter(ObjectGuid guid)
-{
-    LOG_INFO("module", "Prestige> Locking character..");
-
-    CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHARACTER_BAN);
-    stmt->SetData(0, guid.GetCounter());
-    CharacterDatabase.Execute(stmt);
-
-    stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_CHARACTER_BAN);
-    stmt->SetData(0, guid.GetCounter());
-    stmt->SetData(1, 24 * HOUR);
-    stmt->SetData(2, "Prestige");
-    stmt->SetData(3, "Locked character during prestige process.");
-    CharacterDatabase.Execute(stmt);
-
-    LOG_INFO("module", "Prestige> Character locked.");
-}
-
-void PrestigeHandler::UnlockCharacter(ObjectGuid guid)
-{
-    LOG_INFO("module", "Prestige> Unlocking character..");
-
-    CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_CHARACTER_BAN);
-    stmt->SetData(0, guid.GetCounter());
-    CharacterDatabase.Execute(stmt);
-
-    stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHARACTER_BAN);
-    stmt->SetData(0, guid.GetCounter());
-    CharacterDatabase.Execute(stmt);
-
-    LOG_INFO("module", "Prestige> Character unlocked.");
+    DeleteItems(player);
+    EquipDefaultItems(player);
 }
 
 void PrestigeHandler::ResetLevel(Player* player)
@@ -167,44 +137,30 @@ void PrestigeHandler::ResetHomebindAndPosition(Player* player)
     LOG_INFO("module", "Prestige> Player homebind and position reset.");
 }
 
-void PrestigeHandler::StoreAllItems(ObjectGuid guid)
+void PrestigeHandler::DeleteItems(Player* player)
 {
-    LOG_INFO("module", "Prestige> Storing player items..");
+    LOG_INFO("module", "Prestige> Deleting player items..");
 
-    // Save these item guids to a separate table to be able to retrieve them at max level via mail.
+    // Delete equipped items.
+    for (uint32 i = 0; i < INVENTORY_SLOT_BAG_START; ++i)
     {
-        QueryResult result = CharacterDatabase.Query("SELECT item FROM character_inventory WHERE guid = {}", guid.GetRawValue());
-
-        if (!result)
-        {
-            LOG_INFO("module", "Prestige> No items to store, skipping..");
-            return;
-        }
-
-        do
-        {
-            auto fields = result->Fetch();
-
-            auto itemGuid = fields[0].Get<uint32>();
-
-            CharacterDatabase.Execute("INSERT INTO prestige_backup_inventory (player_guid, item_guid) VALUES ({}, {})", guid.GetRawValue(), itemGuid);
-        } while (result->NextRow());
+        player->RemoveItem(INVENTORY_SLOT_BAG_0, i, true);
     }
 
-    LOG_INFO("module", "Prestige> Removing references to items..");
-    // Clean all references to items in inventory (bags, bank, etc..)
+    // Delete default bag items
+    for (uint32 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
     {
-        CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_INVENTORY);
-        stmt->SetData(0, guid.GetCounter());
-        CharacterDatabase.Execute(stmt);
+        player->RemoveItem(INVENTORY_SLOT_BAG_0, i, true);
     }
 
-    LOG_INFO("module", "Prestige> Player items reset.");
+    // TODO: Clean bank, keychain, additional bags, etc..
+
+    LOG_INFO("module", "Prestige> Player items were deleted.");
 }
 
-void PrestigeHandler::AddDefaultItems(ObjectGuid guid, uint8 pRace, uint8 pClass, uint8 pGender)
+void PrestigeHandler::EquipDefaultItems(Player* player)
 {
-    auto startOutfit = GetCharStartOutfitEntry(pRace, pClass, pGender);
+    auto startOutfit = GetCharStartOutfitEntry(player->getRace(), player->getClass(), player->getGender());
 
     for (uint8 i = 0; i < MAX_OUTFIT_ITEMS; ++i)
     {
@@ -216,23 +172,8 @@ void PrestigeHandler::AddDefaultItems(ObjectGuid guid, uint8 pRace, uint8 pClass
             continue;
         }
 
-        auto item = Item::CreateItem(itemEntry, 1);
-        auto itemGuid = item->GetGUID();
-
-        auto equipSlot = InventoryTypeToEquipSlot(item->GetTemplate()->InventoryType);
-
-        if (equipSlot == -1)
-        {
-            LOG_WARN("module", "Failed to find a valid equip slot for item {} for guid {}.", item->GetEntry(), guid.GetRawValue());
-            continue;
-        }
-        
-        CharacterDatabase.Execute("INSERT INTO character_inventory (guid, bag, slot, item) VALUES ({}, {}, {}, {})", guid.GetRawValue(), 0, equipSlot, itemGuid.GetCounter());
-
-        LOG_INFO("module", "Created default item {} with guid {}.", item->GetTemplate()->Name1, itemGuid.GetCounter());
+        player->StoreNewItemInBestSlots(itemEntry, 1);
     }
-
-    // TODO: Add the items to play.
 }
 
 int32 PrestigeHandler::InventoryTypeToEquipSlot(uint32 invType)
