@@ -34,6 +34,8 @@ void PrestigeHandler::DoPrestige(Player* player)
 
     DeleteItems(player);
     EquipDefaultItems(player);
+
+    player->SaveToDB(false, false);
 }
 
 void PrestigeHandler::ResetLevel(Player* player)
@@ -151,6 +153,17 @@ void PrestigeHandler::DeleteItems(Player* player)
     for (uint32 i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
     {
         player->RemoveItem(INVENTORY_SLOT_BAG_0, i, true);
+    }
+
+    // Delete items in additional bags
+    for (uint32 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    {
+        auto bag = player->GetBagByPos(i);
+
+        for (uint32 j = 0; j < bag->GetBagSize(); ++j)
+        {
+            player->RemoveItem(i, j, true);
+        }
     }
 
     // TODO: Clean bank, keychain, additional bags, etc..
