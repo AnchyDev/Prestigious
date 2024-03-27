@@ -27,37 +27,9 @@ void PrestigeHandler::DoPrestige(Player* player)
         return;
     }
 
-    auto accountId = player->GetSession()->GetAccountId();
-    auto guid = player->GetGUID();
-
-    uint32 pRace = player->getRace();
-    uint32 pClass = player->getClass();
-    uint32 pGender = player->getGender();
-    uint32 isHeroClass = pClass == CLASS_DEATH_KNIGHT;
-
-    // Lock the character incase the player tries relogging
-    LockCharacter(guid);
-
-    // Save the current player state to DB and logout.
-    player->SaveToDB(false, false);
-    player->GetSession()->LogoutPlayer(false);
-
-    // TODO: I should detect the end of the transaction instead of just queueing it for the future to prevent race conditions.
-    // Schedule for later in the future in the case of race condition.
-    Scheduler.Schedule(3s, [this, guid, isHeroClass, pRace, pClass, pGender](TaskContext context)
-    {
-        // Start prestige process
-        ResetLevel(guid, isHeroClass);
-        ResetSpells(guid);
-        ResetQuests(guid);
-        ResetHomebindAndPosition(guid, pRace, pClass);
-
-        StoreAllItems(guid);
-        AddDefaultItems(guid, pRace, pClass, pGender);
-
-        // Unlock the character
-        UnlockCharacter(guid);
-    });
+    ResetLevel(player);
+    //ResetSpells(player);
+    ResetQuests(player);
 }
 
 void PrestigeHandler::LockCharacter(ObjectGuid guid)
@@ -93,60 +65,65 @@ void PrestigeHandler::UnlockCharacter(ObjectGuid guid)
     LOG_INFO("module", "Prestige> Character unlocked.");
 }
 
-void PrestigeHandler::ResetLevel(ObjectGuid guid, bool isHeroClass)
+void PrestigeHandler::ResetLevel(Player* player)
 {
     LOG_INFO("module", "Prestige> Resetting player level..");
 
+    uint32 isHeroClass = player->getClass() == CLASS_DEATH_KNIGHT;
     uint32 level = isHeroClass ? 55 : 1;
 
-    CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_LEVEL);
-    stmt->SetData(0, uint8(level));
-    stmt->SetData(1, guid.GetCounter());
-    CharacterDatabase.Execute(stmt);
-
-    sCharacterCache->UpdateCharacterLevel(guid, level);
+    player->SetLevel(level, true);
+    player->InitStatsForLevel(true);
 
     LOG_INFO("module", "Prestige> Player level reset to '{}'.", level);
 }
 
-void PrestigeHandler::ResetSpells(ObjectGuid guid)
+void PrestigeHandler::ResetSpells(Player* player)
 {
     LOG_INFO("module", "Prestige> Resetting player spells..");
 
-    CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_SPELL);
-    stmt->SetData(0, guid.GetCounter());
-    CharacterDatabase.Execute(stmt);
+    auto spellMap = player->GetSpellMap();
+    for (auto& spellEntry : spellMap)
+    {
+        auto spellId = spellEntry.first;
+
+        player->removeSpell(spellId, SPEC_MASK_ALL, false);
+    }
+
+    player->LearnDefaultSkills();
+    player->LearnCustomSpells();
 
     LOG_INFO("module", "Prestige> Player spells reset.");
 }
 
-void PrestigeHandler::ResetQuests(ObjectGuid guid)
+void PrestigeHandler::ResetQuests(Player* player)
 {
     LOG_INFO("module", "Prestige> Resetting player quest status..");
 
-    CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_QUESTSTATUS);
-    stmt->SetData(0, guid.GetCounter());
-    CharacterDatabase.Execute(stmt);
+    player->ResetDailyQuestStatus();
+    player->ResetWeeklyQuestStatus();
+    player->ResetMonthlyQuestStatus();
 
-    stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_QUESTSTATUS_REWARDED);
-    stmt->SetData(0, guid.GetCounter());
-    CharacterDatabase.Execute(stmt);
+    auto quests = player->getRewardedQuests();
+    for (auto& quest : quests)
+    {
+        player->SetQuestStatus(quest, QUEST_STATUS_NONE, true);
+    }
 
-    stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_QUEST_STATUS_SEASONAL_CHAR);
-    stmt->SetData(0, guid.GetCounter());
-    CharacterDatabase.Execute(stmt);
+    for (auto questSlot = 0; questSlot < MAX_QUEST_LOG_SIZE; questSlot++)
+    {
+        auto quest = player->GetQuestSlotQuestId(questSlot);
+        if (!quest)
+        {
+            continue;
+        }
 
-    stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_QUEST_STATUS_DAILY_CHAR);
-    stmt->SetData(0, guid.GetCounter());
-    CharacterDatabase.Execute(stmt);
-
-    stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_QUEST_STATUS_WEEKLY_CHAR);
-    stmt->SetData(0, guid.GetCounter());
-    CharacterDatabase.Execute(stmt);
-
-    stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_QUEST_STATUS_MONTHLY_CHAR);
-    stmt->SetData(0, guid.GetCounter());
-    CharacterDatabase.Execute(stmt);
+        player->TakeQuestSourceItem(quest, false);
+        player->AbandonQuest(quest);
+        player->RemoveActiveQuest(quest, true);
+        player->RemoveTimedAchievement(ACHIEVEMENT_TIMED_TYPE_QUEST, quest);
+        player->SetQuestSlot(questSlot, 0);
+    }
 
     LOG_INFO("module", "Prestige> Player quest status reset.");
 }
@@ -251,8 +228,59 @@ void PrestigeHandler::AddDefaultItems(ObjectGuid guid, uint8 pRace, uint8 pClass
         auto item = Item::CreateItem(itemEntry, 1);
         auto itemGuid = item->GetGUID();
 
+        auto equipSlot = InventoryTypeToEquipSlot(item->GetTemplate()->InventoryType);
+
+        if (equipSlot == -1)
+        {
+            LOG_WARN("module", "Failed to find a valid equip slot for item {} for guid {}.", item->GetEntry(), guid.GetRawValue());
+            continue;
+        }
+        
+        CharacterDatabase.Execute("INSERT INTO character_inventory (guid, bag, slot, item) VALUES ({}, {}, {}, {})", guid.GetRawValue(), 0, equipSlot, itemGuid.GetCounter());
+
         LOG_INFO("module", "Created default item {} with guid {}.", item->GetTemplate()->Name1, itemGuid.GetCounter());
     }
 
     // TODO: Add the items to play.
+}
+
+int32 PrestigeHandler::InventoryTypeToEquipSlot(uint32 invType)
+{
+    switch (invType)
+    {
+        case INVTYPE_HEAD:
+            return EQUIPMENT_SLOT_HEAD;
+
+        case INVTYPE_NECK:
+            return EQUIPMENT_SLOT_NECK;
+
+        case INVTYPE_SHOULDERS:
+            return EQUIPMENT_SLOT_SHOULDERS;
+
+        case INVTYPE_CLOAK:
+            return EQUIPMENT_SLOT_BACK;
+
+        case INVTYPE_CHEST:
+            return EQUIPMENT_SLOT_CHEST;
+
+        case INVTYPE_BODY:
+            return EQUIPMENT_SLOT_BODY;
+
+        case INVTYPE_WRISTS:
+            return EQUIPMENT_SLOT_WRISTS;
+
+        case INVTYPE_HANDS:
+            return EQUIPMENT_SLOT_HANDS;
+
+        case INVTYPE_WAIST:
+            return EQUIPMENT_SLOT_WAIST;
+
+        case INVTYPE_LEGS:
+            return EQUIPMENT_SLOT_LEGS;
+
+        case INVTYPE_FEET:
+            return EQUIPMENT_SLOT_FEET;
+    }
+
+    return -1;
 }

@@ -23,9 +23,9 @@ public:
     void LockCharacter(ObjectGuid /*guid*/);
     void UnlockCharacter(ObjectGuid /*guid*/);
 
-    void ResetLevel(ObjectGuid /*guid*/, bool /*isHeroClass*/);
-    void ResetSpells(ObjectGuid /*guid*/);
-    void ResetQuests(ObjectGuid /*guid*/);
+    void ResetLevel(Player* /*player*/);
+    void ResetSpells(Player* /*player*/);
+    void ResetQuests(Player* /*player*/);
     void ResetHomebindAndPosition(ObjectGuid /*guid*/, uint8 /*race*/, uint8 /*class*/);
 
     /// <summary>
@@ -42,6 +42,8 @@ public:
     /// <param name="pClass">The player characters class.</param>
     /// <param name="pGender">The player characters gender.</param>
     void AddDefaultItems(ObjectGuid /*guid*/, uint8 /*pRace*/, uint8 /*pClass*/, uint8 /*pGender*/);
+
+    int32 InventoryTypeToEquipSlot(uint32 /*invType*/);
 
 public:
     TaskScheduler Scheduler;
