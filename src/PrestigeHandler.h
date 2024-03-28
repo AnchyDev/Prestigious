@@ -7,7 +7,7 @@
 class PrestigeHandler
 {
 private:
-    PrestigeHandler() { }
+    PrestigeHandler();
 
 public:
     static PrestigeHandler* GetInstance()
@@ -21,12 +21,19 @@ public:
     void DoPrestige(Player* /*player*/);
 
     void ResetLevel(Player* /*player*/);
-    void ResetSpells(Player* /*player*/);
     void ResetQuests(Player* /*player*/);
     void ResetHomebindAndPosition(Player* /*player*/);
 
+    void UnlearnAllSpells(Player* /*player*/);
+    void LearnRacials(Player* /*player*/);
+    void LearnClassSpells(Player* /*player*/);
+
     void DeleteItems(Player* /*player*/);
     void EquipDefaultItems(Player* /*player*/);
+
+private:
+    std::unordered_map<Races, std::vector<uint32>> racialMap;
+    std::unordered_map<Classes, std::vector<uint32>> spellMap;
 };
 
 #define sPrestigeHandler PrestigeHandler::GetInstance()

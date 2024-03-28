@@ -1,5 +1,190 @@
 #include "PrestigeHandler.h"
 
+PrestigeHandler::PrestigeHandler()
+{
+    // Alliance Racials
+    {
+        racialMap.emplace(RACE_HUMAN, std::vector<uint32>{
+            20599, // Diplomacy
+            59752, // Every man for Himself
+            20864, // Mace Specialization
+            58985, // Perception
+            20597, // Sword Specialization
+            20598, // The Human Spirit
+        });
+
+        racialMap.emplace(RACE_DWARF, std::vector<uint32>{
+            2481, // Find Treasure
+            20596, // Frost Resistance
+            20595, // Gun Specialization
+            59224, // Mace Specialization
+            20594, // Stoneform
+        });
+
+        racialMap.emplace(RACE_NIGHTELF, std::vector<uint32>{
+            21009, // Elusiveness
+            20583, // Nature Resistance
+            20583, // Quickness
+            58984, // Shadowmeld
+            20585, // Wisp Spirit
+        });
+
+        racialMap.emplace(RACE_GNOME, std::vector<uint32>{
+            20592, // Arcane Resistance
+            20593, // Engineering Specialization
+            20589, // Escape Artist
+            20591, // Expansive Mind
+        });
+
+        racialMap.emplace(RACE_DRAENEI, std::vector<uint32>{
+            28875, // Gemcutting
+            59542, // Gift of the Naaru
+            6562, // Heroic Presence
+            59535, // Shadow Resistance
+        });
+    }
+
+    // Horde Racials
+    {
+        racialMap.emplace(RACE_ORC, std::vector<uint32>{
+            20574, // Axe Specialization
+            20572, // Blood Fury
+            21563, // Command
+            20573, // Hardiness
+        });
+
+        racialMap.emplace(RACE_UNDEAD_PLAYER, std::vector<uint32>{
+            20577, // Cannibalize
+            20579, // Shadow Resistance
+            5227, // Underwater Breathing
+            7744, // Will of the Forsaken
+        });
+
+        racialMap.emplace(RACE_TAUREN, std::vector<uint32>{
+            20552, // Cultivation
+            20550, // Endurance
+            20551, // Nature Resistance
+            20549, // War Stomp
+        });
+
+        racialMap.emplace(RACE_TROLL, std::vector<uint32>{
+            20557, // Beast Slaying
+            26297, // Berserking
+            26290, // Bow Specialization
+            20555, // Regeneration
+            20558, // Throwing Specialization
+        });
+
+        racialMap.emplace(RACE_BLOODELF, std::vector<uint32>{
+            28877, // Arcane Affinity
+            28730, // Arcane Torrent
+            833, // Magic Resistance
+        });
+    }
+
+    // Class Spells
+    {
+        spellMap.emplace(CLASS_WARRIOR, std::vector<uint32>{
+            6603, // Auto Attack
+            107, // Block
+            81, // Dodge
+            2764, // Throw
+
+            2457, // Battle Stance
+            78, // Heroic Strike
+        });
+
+        spellMap.emplace(CLASS_PALADIN, std::vector<uint32>{
+            6603, // Auto Attack
+            107, // Block
+            81, // Dodge
+
+            635, // Holy Light
+            21084, // Seal of Righteousness
+        });
+
+        spellMap.emplace(CLASS_HUNTER, std::vector<uint32>{
+            6603, // Auto Attack
+            81, // Dodge
+
+            75, // Auto Shot
+            2973, // Raptor Strike
+        });
+
+        spellMap.emplace(CLASS_ROGUE, std::vector<uint32>{
+            6603, // Auto Attack
+            81, // Dodge
+            674, // Dual Wield
+            2764, // Throw
+
+            2098, // Eviscerate
+            1752, // Sinister Strike
+        });
+
+        spellMap.emplace(CLASS_PRIEST, std::vector<uint32>{
+            6603, // Auto Attack
+            81, // Dodge
+            5019, // Shoot
+
+            2050, // Lesser Heal
+            585, // Smite
+        });
+
+        spellMap.emplace(CLASS_SHAMAN, std::vector<uint32>{
+            6603, // Auto Attack
+            107, // Block
+            81, // Dodge
+
+            403, // Lightning Bolt
+            331, // Healing Wave
+        });
+
+        spellMap.emplace(CLASS_MAGE, std::vector<uint32>{
+            6603, // Auto Attack
+            81, // Dodge
+            5019, // Shoot
+
+            133, // Fireball
+            168, // Frost Armor
+        });
+
+        spellMap.emplace(CLASS_WARLOCK, std::vector<uint32>{
+            6603, // Auto Attack
+            81, // Dodge
+            5019, // Shoot
+
+            687, // Demon Skin
+            686, // Shadow Bolt
+        });
+
+        spellMap.emplace(CLASS_DRUID, std::vector<uint32>{
+            6603, // Auto Attack
+            81, // Dodge
+
+            5176, // Wrath
+            5185, // Healing Touch
+        });
+
+        spellMap.emplace(CLASS_DEATH_KNIGHT, std::vector<uint32>{
+            6603, // Auto Attack
+            81, // Dodge
+            674, // Dual Wield
+            10846, // First Aid (Rank 4)
+
+            48266, // Blood Presence
+            45902, // Blood Strike
+            49410, // Forceful Deflection
+            59921, // Frost Fever
+            45477, // Icy Touch
+            61455, // Runic Focus
+            59879, // Blood Plague
+            47541, // Death Coil
+            49576, // Death Grip
+            45462, // Plague Strike
+        });
+    }
+}
+
 bool PrestigeHandler::CanPrestige(Player* player)
 {
     if (!player)
@@ -28,13 +213,21 @@ void PrestigeHandler::DoPrestige(Player* player)
     }
 
     ResetLevel(player);
-    ResetSpells(player);
     ResetQuests(player);
     ResetHomebindAndPosition(player);
 
     DeleteItems(player);
     EquipDefaultItems(player);
 
+    UnlearnAllSpells(player);
+
+    // Update DB for removed spells.
+    player->SaveToDB(false, false);
+
+    LearnRacials(player);
+    LearnClassSpells(player);
+
+    // Update DB with new spells.
     player->SaveToDB(false, false);
 }
 
@@ -51,9 +244,9 @@ void PrestigeHandler::ResetLevel(Player* player)
     LOG_INFO("module", "Prestige> Player level reset to '{}'.", level);
 }
 
-void PrestigeHandler::ResetSpells(Player* player)
+void PrestigeHandler::UnlearnAllSpells(Player* player)
 {
-    LOG_INFO("module", "Prestige> Resetting player spells..");
+    LOG_INFO("module", "Prestige> Unlearning player spells..");
 
     auto spellMap = player->GetSpellMap();
     for (auto& spellEntry : spellMap)
@@ -63,66 +256,58 @@ void PrestigeHandler::ResetSpells(Player* player)
         player->removeSpell(spellId, SPEC_MASK_ALL, false);
     }
 
-    player->LearnDefaultSkills();
-    player->LearnCustomSpells();
+    LOG_INFO("module", "Prestige> Player spells unlearned.");
+}
 
-    // Learn default starter spells
+void PrestigeHandler::LearnRacials(Player* player)
+{
+    LOG_INFO("module", "Prestige> Learning player racials..");
+
+    auto it = racialMap.find(static_cast<Races>(player->getRace()));
+    if (it == racialMap.end())
     {
-        auto classEntry = sChrClassesStore.LookupEntry(player->getClass());
+        LOG_WARN("module", "Failed to find racials for player {} race {}.", player->GetName(), player->getRace());
+        return;
+    }
 
-        if (!classEntry)
+    auto racials = it->second;
+
+    for (auto racial : racials)
+    {
+        if (!racial ||
+            player->HasSpell(racial))
         {
-            LOG_WARN("module", "Prestige> Failed to load class entry for player {}.", player->GetName());
-            return;
+            continue;
         }
 
-        auto spellFamily = classEntry->spellfamily;
+        player->learnSpell(racial);
+    }
 
-        for (auto it = sSkillLineAbilityStore.begin(); it != sSkillLineAbilityStore.end(); ++it)
+    LOG_INFO("module", "Prestige> Player racial spells learned.");
+}
+
+void PrestigeHandler::LearnClassSpells(Player* player)
+{
+    LOG_INFO("module", "Prestige> Learning player class spells..");
+
+    auto it = spellMap.find(static_cast<Classes>(player->getClass()));
+    if (it == spellMap.end())
+    {
+        LOG_WARN("module", "Failed to find spells for player {} class {}.", player->GetName(), player->getClass());
+        return;
+    }
+
+    auto spells = it->second;
+
+    for (auto spell : spells)
+    {
+        if (!spell ||
+            player->HasSpell(spell))
         {
-            if (it->AcquireMethod != 2)
-            {
-                continue;
-            }
-
-            if (it->RaceMask != 0 &&
-                (it->RaceMask & player->getRaceMask()) != player->getRaceMask())
-            {
-                continue;
-            }
-
-            if (it->ClassMask != 0 &&
-                (it->ClassMask & player->getClassMask()) != player->getClassMask())
-            {
-                continue;
-            }
-
-            if (!player->IsSpellFitByClassAndRace(it->Spell))
-            {
-                continue;
-            }
-
-            auto spellInfo = sSpellMgr->GetSpellInfo(it->Spell);
-
-            if (spellInfo->SpellLevel == 0)
-            {
-                continue;
-            }
-
-            if (spellInfo->SpellFamilyName != spellFamily)
-            {
-                continue;
-            }
-
-            if (!SpellMgr::IsSpellValid(spellInfo))
-            {
-                continue;
-            }
-
-            LOG_INFO("module", "Prestige> Learning spell {}:{}", it->Spell, spellInfo->SpellName[0]);
-
-            player->learnSpell(it->Spell);
+            continue;
         }
+
+        player->learnSpell(spell);
     }
 
     auto playerInfo = sObjectMgr->GetPlayerInfo(player->getRace(), player->getClass());
@@ -135,10 +320,16 @@ void PrestigeHandler::ResetSpells(Player* player)
     // Re-cast spells like blood presence / battle stance
     for (auto& castSpell : playerInfo->castSpells)
     {
+        // Dont try to cast a spell the player does not have
+        if (!player->HasSpell(castSpell))
+        {
+            continue;
+        }
+
         player->CastSpell(player, castSpell, true);
     }
 
-    LOG_INFO("module", "Prestige> Player spells reset.");
+    LOG_INFO("module", "Prestige> Player class spells learned.");
 }
 
 void PrestigeHandler::ResetQuests(Player* player)
