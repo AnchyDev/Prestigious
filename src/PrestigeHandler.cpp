@@ -212,7 +212,6 @@ void PrestigeHandler::DoPrestige(Player* player)
         return;
     }
 
-    ResetLevel(player);
     ResetQuests(player);
     ResetHomebindAndPosition(player);
 
@@ -221,6 +220,8 @@ void PrestigeHandler::DoPrestige(Player* player)
 
     UnlearnAllSpells(player);
     DesummonMinion(player);
+
+    ResetLevel(player);
 
     // Update DB for removed spells.
     player->SaveToDB(false, false);
