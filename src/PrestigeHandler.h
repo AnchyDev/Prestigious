@@ -25,6 +25,7 @@ public:
     void ResetHomebindAndPosition(Player* /*player*/);
 
     void UnlearnAllSpells(Player* /*player*/);
+    void DesummonMinion(Player* /*players*/);
     void LearnRacials(Player* /*player*/);
     void LearnClassSpells(Player* /*player*/);
 

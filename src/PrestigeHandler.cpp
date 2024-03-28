@@ -220,6 +220,7 @@ void PrestigeHandler::DoPrestige(Player* player)
     EquipDefaultItems(player);
 
     UnlearnAllSpells(player);
+    DesummonMinion(player);
 
     // Update DB for removed spells.
     player->SaveToDB(false, false);
@@ -257,6 +258,22 @@ void PrestigeHandler::UnlearnAllSpells(Player* player)
     }
 
     LOG_INFO("module", "Prestige> Player spells unlearned.");
+}
+
+void PrestigeHandler::DesummonMinion(Player* player)
+{
+    if (!player->GetMinionGUID())
+    {
+        return;
+    }
+
+    auto minion = player->GetFirstMinion();
+    if (!minion)
+    {
+        return;
+    }
+
+    minion->DespawnOrUnsummon();
 }
 
 void PrestigeHandler::LearnRacials(Player* player)
