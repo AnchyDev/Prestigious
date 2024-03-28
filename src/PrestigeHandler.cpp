@@ -4,7 +4,7 @@ PrestigeHandler::PrestigeHandler()
 {
     // Alliance Racials
     {
-        racialMap.emplace(RACE_HUMAN, std::vector<uint32>{
+        racialMap.emplace(RACE_HUMAN, std::unordered_set<uint32>{
             20599, // Diplomacy
             59752, // Every man for Himself
             20864, // Mace Specialization
@@ -13,7 +13,7 @@ PrestigeHandler::PrestigeHandler()
             20598, // The Human Spirit
         });
 
-        racialMap.emplace(RACE_DWARF, std::vector<uint32>{
+        racialMap.emplace(RACE_DWARF, std::unordered_set<uint32>{
             2481, // Find Treasure
             20596, // Frost Resistance
             20595, // Gun Specialization
@@ -21,7 +21,7 @@ PrestigeHandler::PrestigeHandler()
             20594, // Stoneform
         });
 
-        racialMap.emplace(RACE_NIGHTELF, std::vector<uint32>{
+        racialMap.emplace(RACE_NIGHTELF, std::unordered_set<uint32>{
             21009, // Elusiveness
             20583, // Nature Resistance
             20583, // Quickness
@@ -29,14 +29,14 @@ PrestigeHandler::PrestigeHandler()
             20585, // Wisp Spirit
         });
 
-        racialMap.emplace(RACE_GNOME, std::vector<uint32>{
+        racialMap.emplace(RACE_GNOME, std::unordered_set<uint32>{
             20592, // Arcane Resistance
             20593, // Engineering Specialization
             20589, // Escape Artist
             20591, // Expansive Mind
         });
 
-        racialMap.emplace(RACE_DRAENEI, std::vector<uint32>{
+        racialMap.emplace(RACE_DRAENEI, std::unordered_set<uint32>{
             28875, // Gemcutting
             59542, // Gift of the Naaru
             6562, // Heroic Presence
@@ -46,28 +46,28 @@ PrestigeHandler::PrestigeHandler()
 
     // Horde Racials
     {
-        racialMap.emplace(RACE_ORC, std::vector<uint32>{
+        racialMap.emplace(RACE_ORC, std::unordered_set<uint32>{
             20574, // Axe Specialization
             20572, // Blood Fury
             21563, // Command
             20573, // Hardiness
         });
 
-        racialMap.emplace(RACE_UNDEAD_PLAYER, std::vector<uint32>{
+        racialMap.emplace(RACE_UNDEAD_PLAYER, std::unordered_set<uint32>{
             20577, // Cannibalize
             20579, // Shadow Resistance
             5227, // Underwater Breathing
             7744, // Will of the Forsaken
         });
 
-        racialMap.emplace(RACE_TAUREN, std::vector<uint32>{
+        racialMap.emplace(RACE_TAUREN, std::unordered_set<uint32>{
             20552, // Cultivation
             20550, // Endurance
             20551, // Nature Resistance
             20549, // War Stomp
         });
 
-        racialMap.emplace(RACE_TROLL, std::vector<uint32>{
+        racialMap.emplace(RACE_TROLL, std::unordered_set<uint32>{
             20557, // Beast Slaying
             26297, // Berserking
             26290, // Bow Specialization
@@ -75,7 +75,7 @@ PrestigeHandler::PrestigeHandler()
             20558, // Throwing Specialization
         });
 
-        racialMap.emplace(RACE_BLOODELF, std::vector<uint32>{
+        racialMap.emplace(RACE_BLOODELF, std::unordered_set<uint32>{
             28877, // Arcane Affinity
             28730, // Arcane Torrent
             833, // Magic Resistance
@@ -84,7 +84,7 @@ PrestigeHandler::PrestigeHandler()
 
     // Class Spells
     {
-        spellMap.emplace(CLASS_WARRIOR, std::vector<uint32>{
+        spellMap.emplace(CLASS_WARRIOR, std::unordered_set<uint32>{
             6603, // Auto Attack
             107, // Block
             81, // Dodge
@@ -94,7 +94,7 @@ PrestigeHandler::PrestigeHandler()
             78, // Heroic Strike
         });
 
-        spellMap.emplace(CLASS_PALADIN, std::vector<uint32>{
+        spellMap.emplace(CLASS_PALADIN, std::unordered_set<uint32>{
             6603, // Auto Attack
             107, // Block
             81, // Dodge
@@ -103,7 +103,7 @@ PrestigeHandler::PrestigeHandler()
             21084, // Seal of Righteousness
         });
 
-        spellMap.emplace(CLASS_HUNTER, std::vector<uint32>{
+        spellMap.emplace(CLASS_HUNTER, std::unordered_set<uint32>{
             6603, // Auto Attack
             81, // Dodge
 
@@ -111,7 +111,7 @@ PrestigeHandler::PrestigeHandler()
             2973, // Raptor Strike
         });
 
-        spellMap.emplace(CLASS_ROGUE, std::vector<uint32>{
+        spellMap.emplace(CLASS_ROGUE, std::unordered_set<uint32>{
             6603, // Auto Attack
             81, // Dodge
             674, // Dual Wield
@@ -121,7 +121,7 @@ PrestigeHandler::PrestigeHandler()
             1752, // Sinister Strike
         });
 
-        spellMap.emplace(CLASS_PRIEST, std::vector<uint32>{
+        spellMap.emplace(CLASS_PRIEST, std::unordered_set<uint32>{
             6603, // Auto Attack
             81, // Dodge
             5019, // Shoot
@@ -130,7 +130,7 @@ PrestigeHandler::PrestigeHandler()
             585, // Smite
         });
 
-        spellMap.emplace(CLASS_SHAMAN, std::vector<uint32>{
+        spellMap.emplace(CLASS_SHAMAN, std::unordered_set<uint32>{
             6603, // Auto Attack
             107, // Block
             81, // Dodge
@@ -139,7 +139,7 @@ PrestigeHandler::PrestigeHandler()
             331, // Healing Wave
         });
 
-        spellMap.emplace(CLASS_MAGE, std::vector<uint32>{
+        spellMap.emplace(CLASS_MAGE, std::unordered_set<uint32>{
             6603, // Auto Attack
             81, // Dodge
             5019, // Shoot
@@ -148,7 +148,7 @@ PrestigeHandler::PrestigeHandler()
             168, // Frost Armor
         });
 
-        spellMap.emplace(CLASS_WARLOCK, std::vector<uint32>{
+        spellMap.emplace(CLASS_WARLOCK, std::unordered_set<uint32>{
             6603, // Auto Attack
             81, // Dodge
             5019, // Shoot
@@ -157,7 +157,7 @@ PrestigeHandler::PrestigeHandler()
             686, // Shadow Bolt
         });
 
-        spellMap.emplace(CLASS_DRUID, std::vector<uint32>{
+        spellMap.emplace(CLASS_DRUID, std::unordered_set<uint32>{
             6603, // Auto Attack
             81, // Dodge
 
@@ -165,7 +165,7 @@ PrestigeHandler::PrestigeHandler()
             5185, // Healing Touch
         });
 
-        spellMap.emplace(CLASS_DEATH_KNIGHT, std::vector<uint32>{
+        spellMap.emplace(CLASS_DEATH_KNIGHT, std::unordered_set<uint32>{
             6603, // Auto Attack
             81, // Dodge
             674, // Dual Wield
@@ -225,11 +225,11 @@ void PrestigeHandler::DoPrestige(Player* player)
     // Update DB for removed spells.
     player->SaveToDB(false, false);
 
-    LearnRacials(player);
-    LearnClassSpells(player);
+    //LearnRacials(player);
+    //LearnClassSpells(player);
 
     // Update DB with new spells.
-    player->SaveToDB(false, false);
+    //player->SaveToDB(false, false);
 }
 
 void PrestigeHandler::ResetLevel(Player* player)
@@ -253,6 +253,18 @@ void PrestigeHandler::UnlearnAllSpells(Player* player)
     for (auto& spellEntry : spellMap)
     {
         auto spellId = spellEntry.first;
+
+        if (!spellId)
+        {
+            continue;
+        }
+
+        // Don't unlearn racials or starter spells.
+        if (IsRacialSpell(player->getRace(), spellId) ||
+            IsClassStarterSpell(player->getClass(), spellId))
+        {
+            continue;
+        }
 
         player->removeSpell(spellId, SPEC_MASK_ALL, false);
     }
@@ -504,4 +516,38 @@ void PrestigeHandler::EquipDefaultItems(Player* player)
 
         player->StoreNewItemInBestSlots(itemEntry, 1);
     }
+}
+
+bool PrestigeHandler::IsRacialSpell(uint32 race, uint32 spellId)
+{
+    auto it = racialMap.find(static_cast<Races>(race));
+    if (it == racialMap.end())
+    {
+        return false;
+    }
+
+    auto racials = it->second;
+    if (racials.find(spellId) == racials.end())
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool PrestigeHandler::IsClassStarterSpell(uint32 pClass, uint32 spellId)
+{
+    auto it = spellMap.find(static_cast<Classes>(pClass));
+    if (it == spellMap.end())
+    {
+        return false;
+    }
+
+    auto spells = it->second;
+    if (spells.find(spellId) == spells.end())
+    {
+        return false;
+    }
+
+    return true;
 }
