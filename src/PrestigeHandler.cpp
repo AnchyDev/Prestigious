@@ -436,16 +436,30 @@ void PrestigeHandler::DeleteItems(Player* player)
 {
     LOG_INFO("module", "Prestige> Deleting player items..");
 
+    uint32 deleted = 0;
+
     // Delete equipped items.
     for (uint32 i = 0; i < INVENTORY_SLOT_BAG_START; ++i)
     {
-        player->RemoveItem(INVENTORY_SLOT_BAG_0, i, true);
+        if (!player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+        {
+            continue;
+        }
+
+        player->DestroyItem(INVENTORY_SLOT_BAG_0, i, true);
+        deleted++;
     }
 
     // Delete default bag items
     for (uint32 i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
     {
-        player->RemoveItem(INVENTORY_SLOT_BAG_0, i, true);
+        if (!player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+        {
+            continue;
+        }
+
+        player->DestroyItem(INVENTORY_SLOT_BAG_0, i, true);
+        deleted++;
     }
 
     // Delete items in additional bags
@@ -460,7 +474,13 @@ void PrestigeHandler::DeleteItems(Player* player)
 
         for (uint32 j = 0; j < bag->GetBagSize(); ++j)
         {
-            player->RemoveItem(i, j, true);
+            if (!player->GetItemByPos(i, j))
+            {
+                continue;
+            }
+
+            player->DestroyItem(i, j, true);
+            deleted++;
         }
     }
 
@@ -468,18 +488,31 @@ void PrestigeHandler::DeleteItems(Player* player)
     for (uint32 i = BUYBACK_SLOT_START; i < BUYBACK_SLOT_END; ++i)
     {
         player->RemoveItemFromBuyBackSlot(i, true);
+        deleted++;
     }
 
     // Delete items from the keyring
     for (uint32 i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; ++i)
     {
-        player->RemoveItem(INVENTORY_SLOT_BAG_0, i, true);
+        if (!player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+        {
+            continue;
+        }
+
+        player->DestroyItem(INVENTORY_SLOT_BAG_0, i, true);
+        deleted++;
     }
 
     // Delete items from the main bank slots
     for (uint32 i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; ++i)
     {
-        player->RemoveItem(INVENTORY_SLOT_BAG_0, i, true);
+        if (!player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+        {
+            continue;
+        }
+
+        player->DestroyItem(INVENTORY_SLOT_BAG_0, i, true);
+        deleted++;
     }
 
     // Delete items from the additional bank bag slots
@@ -494,11 +527,17 @@ void PrestigeHandler::DeleteItems(Player* player)
 
         for (uint32 j = 0; j < bag->GetBagSize(); ++j)
         {
-            player->RemoveItem(i, j, true);
+            if (!player->GetItemByPos(i, j))
+            {
+                continue;
+            }
+
+            player->DestroyItem(i, j, true);
+            deleted++;
         }
     }
 
-    LOG_INFO("module", "Prestige> Player items were deleted.");
+    LOG_INFO("module", "Prestige> {} player items were deleted.", deleted);
 }
 
 void PrestigeHandler::EquipDefaultItems(Player* player)
