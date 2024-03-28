@@ -11,6 +11,8 @@ PrestigeHandler::PrestigeHandler()
             58985, // Perception
             20597, // Sword Specialization
             20598, // The Human Spirit
+
+            668, // Common (Language)
         });
 
         racialMap.emplace(RACE_DWARF, std::unordered_set<uint32>{
@@ -19,6 +21,9 @@ PrestigeHandler::PrestigeHandler()
             20595, // Gun Specialization
             59224, // Mace Specialization
             20594, // Stoneform
+
+            668, // Common (Language)
+            672, // Dwarvish (Language)
         });
 
         racialMap.emplace(RACE_NIGHTELF, std::unordered_set<uint32>{
@@ -27,6 +32,9 @@ PrestigeHandler::PrestigeHandler()
             20583, // Quickness
             58984, // Shadowmeld
             20585, // Wisp Spirit
+
+            668, // Common (Language)
+            671, // Darnassian (Language)
         });
 
         racialMap.emplace(RACE_GNOME, std::unordered_set<uint32>{
@@ -34,6 +42,9 @@ PrestigeHandler::PrestigeHandler()
             20593, // Engineering Specialization
             20589, // Escape Artist
             20591, // Expansive Mind
+
+            668, // Common (Language)
+            7340, // Gnomish (Language)
         });
 
         racialMap.emplace(RACE_DRAENEI, std::unordered_set<uint32>{
@@ -41,6 +52,9 @@ PrestigeHandler::PrestigeHandler()
             59542, // Gift of the Naaru
             6562, // Heroic Presence
             59535, // Shadow Resistance
+
+            668, // Common (Language)
+            29932, // Draenei (Language)
         });
     }
 
@@ -51,6 +65,8 @@ PrestigeHandler::PrestigeHandler()
             20572, // Blood Fury
             21563, // Command
             20573, // Hardiness
+
+            669, // Orcish (Language)
         });
 
         racialMap.emplace(RACE_UNDEAD_PLAYER, std::unordered_set<uint32>{
@@ -58,6 +74,9 @@ PrestigeHandler::PrestigeHandler()
             20579, // Shadow Resistance
             5227, // Underwater Breathing
             7744, // Will of the Forsaken
+
+            669, // Orcish (Language)
+            17737, // Gutterspeak (Language)
         });
 
         racialMap.emplace(RACE_TAUREN, std::unordered_set<uint32>{
@@ -65,6 +84,9 @@ PrestigeHandler::PrestigeHandler()
             20550, // Endurance
             20551, // Nature Resistance
             20549, // War Stomp
+
+            669, // Orcish (Language)
+            670, // Taurahe (Language)
         });
 
         racialMap.emplace(RACE_TROLL, std::unordered_set<uint32>{
@@ -73,12 +95,18 @@ PrestigeHandler::PrestigeHandler()
             26290, // Bow Specialization
             20555, // Regeneration
             20558, // Throwing Specialization
+
+            669, // Orcish (Language)
+            7341, // Troll (Language)
         });
 
         racialMap.emplace(RACE_BLOODELF, std::unordered_set<uint32>{
             28877, // Arcane Affinity
             28730, // Arcane Torrent
             833, // Magic Resistance
+
+            669, // Orcish (Language)
+            813, // Thalassian (Language)
         });
     }
 
