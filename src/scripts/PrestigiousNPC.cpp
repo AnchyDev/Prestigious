@@ -2,6 +2,7 @@
 #include "PrestigeHandler.h"
 
 #include "Chat.h"
+#include "Config.h"
 #include "GameTime.h"
 #include "Player.h"
 #include "ScriptedGossip.h"
@@ -9,6 +10,12 @@
 bool PrestigiousNPCScript::OnGossipHello(Player* player, Creature* creature)
 {
     ClearGossipMenuFor(player);
+
+    if (!sConfigMgr->GetOption<bool>("Prestigious.Enable", false))
+    {
+        SendGossipMenuFor(player, PRESTIGE_TEXT_CANNOT_PRESTIGE, creature);
+        return true;
+    }
 
     if (sPrestigeHandler->CanPrestige(player))
     {
@@ -26,6 +33,12 @@ bool PrestigiousNPCScript::OnGossipHello(Player* player, Creature* creature)
 
 bool PrestigiousNPCScript::OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 action)
 {
+    if (!sConfigMgr->GetOption<bool>("Prestigious.Enable", false))
+    {
+        CloseGossipMenuFor(player);
+        return true;
+    }
+
     switch (action)
     {
     case PRESTIGE_DO_PRESTIGE:

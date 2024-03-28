@@ -1,5 +1,7 @@
 #include "PrestigeHandler.h"
 
+#include "Config.h"
+
 PrestigeHandler::PrestigeHandler()
 {
     // Alliance Racials
@@ -467,101 +469,122 @@ void PrestigeHandler::DeleteItems(Player* player)
     uint32 deleted = 0;
 
     // Delete equipped items.
-    for (uint32 i = 0; i < INVENTORY_SLOT_BAG_START; ++i)
+    if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Equipped", true))
     {
-        if (!player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+        for (uint32 i = 0; i < INVENTORY_SLOT_BAG_START; ++i)
         {
-            continue;
-        }
-
-        player->DestroyItem(INVENTORY_SLOT_BAG_0, i, true);
-        deleted++;
-    }
-
-    // Delete default bag items
-    for (uint32 i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
-    {
-        if (!player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
-        {
-            continue;
-        }
-
-        player->DestroyItem(INVENTORY_SLOT_BAG_0, i, true);
-        deleted++;
-    }
-
-    // Delete items in additional bags
-    for (uint32 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
-    {
-        auto bag = player->GetBagByPos(i);
-
-        if (!bag)
-        {
-            continue;
-        }
-
-        for (uint32 j = 0; j < bag->GetBagSize(); ++j)
-        {
-            if (!player->GetItemByPos(i, j))
+            if (!player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
             {
                 continue;
             }
 
-            player->DestroyItem(i, j, true);
+            player->DestroyItem(INVENTORY_SLOT_BAG_0, i, true);
             deleted++;
+        }
+    }
+
+    // Delete default bag items
+    if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Inventory", true))
+    {
+        for (uint32 i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+        {
+            if (!player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+            {
+                continue;
+            }
+
+            player->DestroyItem(INVENTORY_SLOT_BAG_0, i, true);
+            deleted++;
+        }
+    }
+
+    // Delete items in additional bags
+    if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Inventory.Bags", true))
+    {
+        for (uint32 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+        {
+            auto bag = player->GetBagByPos(i);
+
+            if (!bag)
+            {
+                continue;
+            }
+
+            for (uint32 j = 0; j < bag->GetBagSize(); ++j)
+            {
+                if (!player->GetItemByPos(i, j))
+                {
+                    continue;
+                }
+
+                player->DestroyItem(i, j, true);
+                deleted++;
+            }
         }
     }
 
     // Delete items from the buyback tab
-    for (uint32 i = BUYBACK_SLOT_START; i < BUYBACK_SLOT_END; ++i)
+    if (sConfigMgr->GetOption<bool>("Prestigious.Delete.BuyBack", true))
     {
-        player->RemoveItemFromBuyBackSlot(i, true);
-        deleted++;
+        for (uint32 i = BUYBACK_SLOT_START; i < BUYBACK_SLOT_END; ++i)
+        {
+            player->RemoveItemFromBuyBackSlot(i, true);
+            deleted++;
+        }
     }
 
     // Delete items from the keyring
-    for (uint32 i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; ++i)
+    if (sConfigMgr->GetOption<bool>("Prestigious.Delete.KeyRing", true))
     {
-        if (!player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+        for (uint32 i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; ++i)
         {
-            continue;
-        }
-
-        player->DestroyItem(INVENTORY_SLOT_BAG_0, i, true);
-        deleted++;
-    }
-
-    // Delete items from the main bank slots
-    for (uint32 i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; ++i)
-    {
-        if (!player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
-        {
-            continue;
-        }
-
-        player->DestroyItem(INVENTORY_SLOT_BAG_0, i, true);
-        deleted++;
-    }
-
-    // Delete items from the additional bank bag slots
-    for (uint32 i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; ++i)
-    {
-        auto bag = player->GetBagByPos(i);
-
-        if (!bag)
-        {
-            continue;
-        }
-
-        for (uint32 j = 0; j < bag->GetBagSize(); ++j)
-        {
-            if (!player->GetItemByPos(i, j))
+            if (!player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
             {
                 continue;
             }
 
-            player->DestroyItem(i, j, true);
+            player->DestroyItem(INVENTORY_SLOT_BAG_0, i, true);
             deleted++;
+        }
+    }
+
+    // Delete items from the main bank slots
+    if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Bank", true))
+    {
+        for (uint32 i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; ++i)
+        {
+            if (!player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+            {
+                continue;
+            }
+
+            player->DestroyItem(INVENTORY_SLOT_BAG_0, i, true);
+            deleted++;
+        }
+    }
+
+    // Delete items from the additional bank bag slots
+    if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Bank.Bags", true))
+    {
+        for (uint32 i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; ++i)
+        {
+            auto bag = player->GetBagByPos(i);
+
+            if (!bag)
+            {
+                continue;
+            }
+
+            for (uint32 j = 0; j < bag->GetBagSize(); ++j)
+            {
+                if (!player->GetItemByPos(i, j))
+                {
+                    continue;
+                }
+
+                player->DestroyItem(i, j, true);
+                deleted++;
+            }
         }
     }
 

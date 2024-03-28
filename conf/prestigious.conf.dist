@@ -5,13 +5,77 @@
 [worldserver]
 
 ########################################
-# My module configuration
+# Prestigious Configuration
 ########################################
 #
-#    MyModule.Enable
-#        Description: Enable my module and print "Hello World" message at server start
+#    Prestigious.Enable
+#        Description: Enable/disable the prestigious module.
 #        Default:     0 - Disabled
 #                     1 - Enabled
 #
 
-MyModule.Enable = 1
+Prestigious.Enable = 0
+
+#
+#   Prestigious.Delete.Equipped
+#        Description: Deletes equipped items when prestiging.
+#                     0 - Disabled
+#        Default:     1 - Enabled
+#
+
+Prestigious.Delete.Equipped = 1
+
+#
+#   Prestigious.Delete.Inventory
+#        Description: Deletes inventory items when prestiging.
+#                     0 - Disabled
+#        Default:     1 - Enabled
+#
+
+Prestigious.Delete.Inventory = 1
+
+#
+#   Prestigious.Delete.Inventory.Bags
+#        Description: Deletes inventory bag items when prestiging.
+#                     0 - Disabled
+#        Default:     1 - Enabled
+#
+
+Prestigious.Delete.Inventory.Bags = 1
+
+#
+#   Prestigious.Delete.BuyBack
+#        Description: Deletes items from the vendor buyback tab when prestiging.
+#                     0 - Disabled
+#        Default:     1 - Enabled
+#
+
+Prestigious.Delete.BuyBack = 1
+
+#
+#   Prestigious.Delete.KeyRing
+#        Description: Deletes items from the key ring when prestiging.
+#                     0 - Disabled
+#        Default:     1 - Enabled
+#
+
+Prestigious.Delete.KeyRing = 1
+
+#
+#   Prestigious.Delete.Bank
+#        Description: Deletes items from the bank when prestiging.
+#                     0 - Disabled
+#        Default:     1 - Enabled
+#
+
+Prestigious.Delete.Bank = 1
+
+#
+#   Prestigious.Delete.Bank.Bags
+#        Description: Deletes items from the bank bags when prestiging.
+#                     0 - Disabled
+#        Default:     1 - Enabled
+#
+
+Prestigious.Delete.Bank.Bags = 1
+
