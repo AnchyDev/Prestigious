@@ -318,7 +318,8 @@ void PrestigeHandler::UnlearnAllSpells(Player* player)
         // Don't unlearn professions
         if (!sConfigMgr->GetOption<bool>("Prestigious.Unlearn.Professions", true))
         {
-            if (IsProfession(spellId))
+            if (IsProfession(spellId) ||
+                IsRecipe(spellId))
             {
                 continue;
             }
@@ -699,6 +700,22 @@ bool PrestigeHandler::IsProfession(uint32 spellId)
 
 bool PrestigeHandler::IsRecipe(uint32 spellId)
 {
+    auto spellInfo = sSpellMgr->GetSpellInfo(spellId);
+    if (!spellInfo)
+    {
+        return false;
+    }
+
+    if (spellInfo->Effects[0].Effect == SPELL_EFFECT_TRADE_SKILL)
+    {
+        return false;
+    }
+
+    if ((spellInfo->Attributes & SPELL_ATTR0_IS_TRADESKILL) != SPELL_ATTR0_IS_TRADESKILL)
+    {
+        return false;
+    }
+
     return true;
 }
 
