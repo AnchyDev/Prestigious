@@ -303,6 +303,15 @@ void PrestigeHandler::UnlearnAllSpells(Player* player)
             continue;
         }
 
+        // Don't unlearn professions
+        if (!sConfigMgr->GetOption<bool>("Prestigious.Unlearn.Professions", true))
+        {
+            if (IsProfession(spellId))
+            {
+                continue;
+            }
+        }
+
         player->removeSpell(spellId, SPEC_MASK_ALL, false);
     }
 
@@ -657,6 +666,27 @@ bool PrestigeHandler::IsClassStarterSpell(uint32 pClass, uint32 spellId)
         return false;
     }
 
+    return true;
+}
+
+bool PrestigeHandler::IsProfession(uint32 spellId)
+{
+    auto spellInfo = sSpellMgr->GetSpellInfo(spellId);
+    if (!spellInfo)
+    {
+        return false;
+    }
+
+    if (spellInfo->Effects[0].Effect != SPELL_EFFECT_TRADE_SKILL)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool PrestigeHandler::IsRecipe(uint32 spellId)
+{
     return true;
 }
 

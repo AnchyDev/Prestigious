@@ -89,3 +89,12 @@ Prestigious.Delete.Bank = 1
 
 Prestigious.Delete.Bank.Bags = 1
 
+#
+#   Prestigious.Unlearn.Professions
+#        Description: Unlearns profession spells when prestiging.
+#                     0 - Disabled
+#        Default:     1 - Enabled
+#
+
+Prestigious.Unlearn.Professions = 1
+

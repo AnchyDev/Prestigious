@@ -40,6 +40,9 @@ public:
     bool IsRacialSpell(uint32 /*race*/, uint32 /*spellId*/);
     bool IsClassStarterSpell(uint32 /*class*/, uint32 /*spellId*/);
 
+    bool IsProfession(uint32 /*spellId*/);
+    bool IsRecipe(uint32 /*spellId*/);
+
     void RewardPlayer(Player* /*player*/, uint32 /*avgLevel*/);
 
 private:
