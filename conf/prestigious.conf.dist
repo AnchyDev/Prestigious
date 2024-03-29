@@ -26,6 +26,16 @@ Prestigious.Enable = 0
 Prestigious.Delete.Equipped = 1
 
 #
+#   Prestigious.Delete.Equipped.Reward
+#        Description: Enable/disable rewards for deleting equipped items.
+#	 Note: Rewards scale based off average itemlevel of equipment.
+#                     0 - Disabled
+#        Default:     1 - Enabled
+#
+
+Prestigious.Delete.Equipped.Reward = 1
+
+#
 #   Prestigious.Delete.Inventory
 #        Description: Deletes inventory items when prestiging.
 #                     0 - Disabled

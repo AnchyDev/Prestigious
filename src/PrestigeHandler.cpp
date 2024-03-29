@@ -245,13 +245,19 @@ void PrestigeHandler::DoPrestige(Player* player)
     ResetQuests(player);
     ResetHomebindAndPosition(player);
 
-    DeleteItems(player);
+    uint32 avgLevel = DeleteItems(player);
     EquipDefaultItems(player);
 
     UnlearnAllSpells(player);
     DesummonMinion(player);
 
     ResetLevel(player);
+
+    if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Equipped", true) &&
+        sConfigMgr->GetOption<bool>("Prestigious.Delete.Equipped.Reward", true))
+    {
+        RewardPlayer(player, avgLevel);
+    }
 
     // Update DB for removed spells.
     player->SaveToDB(false, false);
@@ -462,25 +468,34 @@ void PrestigeHandler::ResetHomebindAndPosition(Player* player)
     LOG_INFO("module", "Prestige> Player homebind and position reset.");
 }
 
-void PrestigeHandler::DeleteItems(Player* player)
+uint32 PrestigeHandler::DeleteItems(Player* player)
 {
     LOG_INFO("module", "Prestige> Deleting player items..");
 
     uint32 deleted = 0;
+    uint32 avgLevel = 0;
 
     // Delete equipped items.
     if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Equipped", true))
     {
         for (uint32 i = 0; i < INVENTORY_SLOT_BAG_START; ++i)
         {
-            if (!player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+            auto item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
+            if (!item)
             {
                 continue;
+            }
+
+            if (auto itemProto = item->GetTemplate())
+            {
+                avgLevel += itemProto->ItemLevel;
             }
 
             player->DestroyItem(INVENTORY_SLOT_BAG_0, i, true);
             deleted++;
         }
+
+        avgLevel = avgLevel / 19; // 19: Equipment Slot Count
     }
 
     // Delete default bag items
@@ -589,6 +604,8 @@ void PrestigeHandler::DeleteItems(Player* player)
     }
 
     LOG_INFO("module", "Prestige> {} player items were deleted.", deleted);
+
+    return avgLevel;
 }
 
 void PrestigeHandler::EquipDefaultItems(Player* player)
@@ -641,4 +658,24 @@ bool PrestigeHandler::IsClassStarterSpell(uint32 pClass, uint32 spellId)
     }
 
     return true;
+}
+
+void PrestigeHandler::RewardPlayer(Player* player, uint32 avgLevel)
+{
+    uint32 rewardCount = 1;
+    uint32 multiplier = 1;
+
+    if (avgLevel >= 245)
+    {
+        multiplier = 2;
+    }
+    else if (avgLevel >= 260)
+    {
+        multiplier = 4;
+    }
+
+    rewardCount = rewardCount * multiplier;
+
+    player->SendSystemMessage(Acore::StringFormatFmt("|cffFFFFFFYou were rewarded |cff00FF00{}|cffFFFFFF currency for your average item level of |cff00FF00{}|cffFFFFFF.|r", rewardCount, avgLevel));
+    player->AddItem(37711, rewardCount);
 }
