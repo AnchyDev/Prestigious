@@ -199,7 +199,19 @@ PrestigeHandler::PrestigeHandler()
             6603, // Auto Attack
             81, // Dodge
             674, // Dual Wield
+
             10846, // First Aid (Rank 4)
+            18632, // Heavy Runecloth Bandage
+            18629, // Runecloth Bandage
+            10841, // Heavy Mageweave Bandage
+            10840, // Mageweave Bandage
+            7929, // Heavy Silk Bandage
+            7928, // Silk Bandage
+            3278, // Heavy Wool Bandage
+            3277, // Wool Bandage
+            3276, // Heavy Linen Bandage
+            3275, // Linen Bandage
+            7934, // Anti-Venom
 
             48266, // Blood Presence
             45902, // Blood Strike
