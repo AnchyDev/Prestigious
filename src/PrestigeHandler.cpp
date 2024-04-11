@@ -852,6 +852,126 @@ void PrestigeHandler::SetItemFlagged(Item* item, bool flag)
     }
 }
 
+void PrestigeHandler::UnflagItems(Player* player)
+{
+    LOG_INFO("module", "Prestige> Unflagging player items..");
+
+    uint32 unflagged = 0;
+
+    // Equipped items
+    for (uint32 i = 0; i < INVENTORY_SLOT_BAG_START; ++i)
+    {
+        auto item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
+        if (!item)
+        {
+            continue;
+        }
+
+        SetItemFlagged(item, false);
+        unflagged++;
+    }
+
+    // Default bag items
+    for (uint32 i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+    {
+        auto item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
+        if (!item)
+        {
+            continue;
+        }
+
+        SetItemFlagged(item, false);
+        unflagged++;
+    }
+
+    // Additional bags
+    for (uint32 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    {
+        auto bag = player->GetBagByPos(i);
+
+        if (!bag)
+        {
+            continue;
+        }
+
+        for (uint32 j = 0; j < bag->GetBagSize(); ++j)
+        {
+            auto item = player->GetItemByPos(i, j);
+            if (!item)
+            {
+                continue;
+            }
+
+            SetItemFlagged(item, false);
+            unflagged++;
+        }
+    }
+
+    // Items from the buyback tab
+    for (uint32 i = BUYBACK_SLOT_START; i < BUYBACK_SLOT_END; ++i)
+    {
+        auto item = player->GetItemFromBuyBackSlot(i);
+        if (!item)
+        {
+            continue;
+        }
+
+        SetItemFlagged(item, false);
+        unflagged++;
+    }
+
+    // Items from the keyring
+    for (uint32 i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; ++i)
+    {
+        auto item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
+        if (!item)
+        {
+            continue;
+        }
+
+        SetItemFlagged(item, false);
+        unflagged++;
+    }
+
+    // Items from the main bank slots
+    for (uint32 i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; ++i)
+    {
+        auto item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
+        if (!item)
+        {
+            continue;
+        }
+
+        SetItemFlagged(item, false);
+        unflagged++;
+    }
+
+    // Items from the additional bank bag slots
+    for (uint32 i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; ++i)
+    {
+        auto bag = player->GetBagByPos(i);
+
+        if (!bag)
+        {
+            continue;
+        }
+
+        for (uint32 j = 0; j < bag->GetBagSize(); ++j)
+        {
+            auto item = player->GetItemByPos(i, j);
+            if (!item)
+            {
+                continue;
+            }
+
+            SetItemFlagged(item, false);
+            unflagged++;
+        }
+    }
+
+    LOG_INFO("module", "Prestige> {} player items were unflagged.", unflagged);
+}
+
 bool PrestigeHandler::UnequipItems(Player* player)
 {
     if (!player)

@@ -52,6 +52,7 @@ public:
     void RewardPlayer(Player* /*player*/, uint32 /*avgLevel*/);
 
     void SetItemFlagged(Item* /*item*/, bool /*flag*/);
+    void UnflagItems(Player* /*player*/);
 
 private:
     std::unordered_map<Races, std::unordered_set<uint32>> racialMap;

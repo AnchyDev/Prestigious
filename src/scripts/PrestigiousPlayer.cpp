@@ -1,4 +1,5 @@
 #include "PrestigiousPlayer.h"
+#include "PrestigeHandler.h"
 
 void PrestigiousPlayerScript::OnLevelChanged(Player* player, uint8 /*oldLevel*/)
 {
@@ -7,10 +8,12 @@ void PrestigiousPlayerScript::OnLevelChanged(Player* player, uint8 /*oldLevel*/)
         return;
     }
 
-    if (player->GetLevel() >= sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
+    if (player->GetLevel() < sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
     {
-        LOG_INFO("module", "Player hit max level.");
+        return;
     }
+
+    sPrestigeHandler->UnflagItems(player);
 }
 
 bool PrestigiousPlayerScript::CanEquipItem(Player* player, uint8 /*slot*/, uint16& /*dest*/, Item* pItem, bool /*swap*/, bool /*not_loading*/)
@@ -20,7 +23,7 @@ bool PrestigiousPlayerScript::CanEquipItem(Player* player, uint8 /*slot*/, uint1
         return true;
     }
 
-    if (pItem->HasFlag(ITEM_FIELD_FLAGS, ITEM_FIELD_FLAG_UNK26))
+    if (pItem->HasFlag(ITEM_FIELD_FLAGS, sPrestigeHandler->ITEM_FIELD_FLAG_PRESTIGE_LOCK))
     {
         player->SendSystemMessage("You cannot equip this item since you acquired it from a previous playthrough. Reach max level to unlock the item.");
         return false;
