@@ -254,10 +254,23 @@ void PrestigeHandler::DoPrestige(Player* player)
         return;
     }
 
+    if (sConfigMgr->GetOption<bool>("Prestigious.Unequip.Equipped", true))
+    {
+        bool result = UnequipItems(player);
+
+        if (!result)
+        {
+            player->SendSystemMessage("Failed to prestige, there was no space in your inventory to store your equipment.");
+            return;
+        }
+    }
+
     ResetQuests(player);
     ResetHomebindAndPosition(player);
 
+    // There are internal checks here for deleting items.
     uint32 avgLevel = DeleteItems(player);
+
     EquipDefaultItems(player);
 
     UnlearnAllSpells(player);
@@ -737,4 +750,50 @@ void PrestigeHandler::RewardPlayer(Player* player, uint32 avgLevel)
 
     player->SendSystemMessage(Acore::StringFormatFmt("|cffFFFFFFYou were rewarded |cff00FF00{}|cffFFFFFF currency for your average item level of |cff00FF00{}|cffFFFFFF.|r", rewardCount, avgLevel));
     player->AddItem(37711, rewardCount);
+}
+
+void PrestigeHandler::SetItemFlagged(Item* item, bool flag)
+{
+    if (!item)
+    {
+        return;
+    }
+
+    if (flag && !item->HasFlag(ITEM_FIELD_FLAGS, ITEM_FIELD_FLAG_PRESTIGE_LOCK))
+    {
+        item->SetFlag(ITEM_FIELD_FLAGS, ITEM_FIELD_FLAG_PRESTIGE_LOCK);
+    }
+    else if (!flag && item->HasFlag(ITEM_FIELD_FLAGS, ITEM_FIELD_FLAG_PRESTIGE_LOCK))
+    {
+        item->RemoveFlag(ITEM_FIELD_FLAGS, ITEM_FIELD_FLAG_PRESTIGE_LOCK);
+    }
+}
+
+bool PrestigeHandler::UnequipItems(Player* player)
+{
+    if (!player)
+    {
+        return false;
+    }
+
+    for (uint32 i = 0; i < INVENTORY_SLOT_BAG_START; ++i)
+    {
+        auto item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
+        if (!item)
+        {
+            continue;
+        }
+
+        ItemPosCountVec newDest;
+        uint8 off_msg = player->CanStoreItem(NULL_BAG, NULL_SLOT, newDest, item, false);
+        if (off_msg != EQUIP_ERR_OK)
+        {
+            return false;
+        }
+
+        player->RemoveItem(INVENTORY_SLOT_BAG_0, i, true);
+        player->StoreItem(newDest, item, true);
+
+        return true;
+    }
 }

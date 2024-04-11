@@ -17,6 +17,11 @@ public:
         return &instance;
     }
 
+    enum PrestigeHandlerConstants : uint32
+    {
+        ITEM_FIELD_FLAG_PRESTIGE_LOCK = 0x80000000 // This is equivalent to ITEM_FIELD_FLAG_UNK26, which seems to be unused.
+    };
+
     bool CanPrestige(Player* /*player*/);
     void DoPrestige(Player* /*player*/);
 
@@ -36,6 +41,7 @@ public:
     /// <returns>The average item level of deleted equipment.</returns>
     uint32 DeleteItems(Player* /*player*/);
     void EquipDefaultItems(Player* /*player*/);
+    bool UnequipItems(Player* /*player*/);
 
     bool IsRacialSpell(uint32 /*race*/, uint32 /*spellId*/);
     bool IsClassStarterSpell(uint32 /*class*/, uint32 /*spellId*/);
@@ -44,6 +50,8 @@ public:
     bool IsRecipe(uint32 /*spellId*/);
 
     void RewardPlayer(Player* /*player*/, uint32 /*avgLevel*/);
+
+    void SetItemFlagged(Item* /*item*/, bool /*flag*/);
 
 private:
     std::unordered_map<Races, std::unordered_set<uint32>> racialMap;
