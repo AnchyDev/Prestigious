@@ -275,6 +275,7 @@ void PrestigeHandler::DoPrestige(Player* player)
 
     UnlearnAllSpells(player);
     DesummonMinion(player);
+    ResetActionbar(player);
 
     ResetLevel(player);
 
@@ -501,6 +502,36 @@ void PrestigeHandler::ResetHomebindAndPosition(Player* player)
     player->TeleportTo(worldLoc);
 
     LOG_INFO("module", "Prestige> Player homebind and position reset.");
+}
+
+void PrestigeHandler::ResetActionbar(Player* player)
+{
+    if (!player)
+    {
+        return;
+    }
+
+    PlayerInfo const* pInfo = sObjectMgr->GetPlayerInfo(player->getRace(), player->getClass());
+
+    if (!pInfo)
+    {
+        LOG_WARN("module", "Prestige> Failed to load player information for player {}.", player->GetName());
+        return;
+    }
+
+    // Clear actionbar
+    for (uint8 i = 0; i <= MAX_ACTION_BUTTONS; i++)
+    {
+        player->removeActionButton(i);
+    }
+
+    // Repopulate actionbar
+    for (auto it = pInfo->action.begin(); it != pInfo->action.end(); ++it)
+    {
+        player->addActionButton(it->button, it->action, it->type);
+    }
+
+    player->SendActionButtons(1);
 }
 
 uint32 PrestigeHandler::IterateItems(Player* player)

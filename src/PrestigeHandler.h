@@ -28,6 +28,7 @@ public:
     void ResetLevel(Player* /*player*/);
     void ResetQuests(Player* /*player*/);
     void ResetHomebindAndPosition(Player* /*player*/);
+    void ResetActionbar(Player* /*player*/);
 
     void UnlearnAllSpells(Player* /*player*/);
     void DesummonMinion(Player* /*players*/);
