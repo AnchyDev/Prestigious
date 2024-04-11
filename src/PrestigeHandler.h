@@ -35,11 +35,11 @@ public:
     void LearnClassSpells(Player* /*player*/);
 
     /// <summary>
-    /// Deletes items from inventory, bank, buyback, keychain, bags, etc..
+    /// Deletes/flags items from inventory, bank, buyback, keychain, bags, etc..
     /// </summary>
-    /// <param name="player">The player to delete the items from.</param>
-    /// <returns>The average item level of deleted equipment.</returns>
-    uint32 DeleteItems(Player* /*player*/);
+    /// <param name="player">The player to delete/flag the items from.</param>
+    /// <returns>The average item level of deleted/flagged equipment.</returns>
+    uint32 IterateItems(Player* /*player*/);
     void EquipDefaultItems(Player* /*player*/);
     bool UnequipItems(Player* /*player*/);
 

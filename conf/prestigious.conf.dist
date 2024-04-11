@@ -107,3 +107,12 @@ Prestigious.Unlearn.Professions = 1
 
 Prestigious.Unequip.Equipped = 1
 
+
+#
+#   Prestigious.FlagItems
+#        Description: Flags old items on prestige, making them unequippable until you reach max level.
+#                     0 - Disabled
+#        Default:     1 - Enabled
+#
+
+Prestigious.FlagItems = 1

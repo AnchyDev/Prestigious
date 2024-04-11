@@ -269,7 +269,7 @@ void PrestigeHandler::DoPrestige(Player* player)
     ResetHomebindAndPosition(player);
 
     // There are internal checks here for deleting items.
-    uint32 avgLevel = DeleteItems(player);
+    uint32 avgLevel = IterateItems(player);
 
     EquipDefaultItems(player);
 
@@ -503,15 +503,17 @@ void PrestigeHandler::ResetHomebindAndPosition(Player* player)
     LOG_INFO("module", "Prestige> Player homebind and position reset.");
 }
 
-uint32 PrestigeHandler::DeleteItems(Player* player)
+uint32 PrestigeHandler::IterateItems(Player* player)
 {
-    LOG_INFO("module", "Prestige> Deleting player items..");
+    LOG_INFO("module", "Prestige> Deleting/flagging player items..");
 
+    uint32 flagged = 0;
     uint32 deleted = 0;
     uint32 avgLevel = 0;
 
-    // Delete equipped items.
-    if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Equipped", true))
+    // Equipped items
+    if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Equipped", false) ||
+        sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
     {
         for (uint32 i = 0; i < INVENTORY_SLOT_BAG_START; ++i)
         {
@@ -526,30 +528,51 @@ uint32 PrestigeHandler::DeleteItems(Player* player)
                 avgLevel += itemProto->ItemLevel;
             }
 
-            player->DestroyItem(INVENTORY_SLOT_BAG_0, i, true);
-            deleted++;
+            if (sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
+            {
+                SetItemFlagged(item, true);
+                flagged++;
+            }
+
+            if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Equipped", false))
+            {
+                player->DestroyItem(INVENTORY_SLOT_BAG_0, i, true);
+                deleted++;
+            }
         }
 
         avgLevel = avgLevel / 19; // 19: Equipment Slot Count
     }
 
-    // Delete default bag items
-    if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Inventory", true))
+    // Default bag items
+    if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Inventory", false) ||
+        sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
     {
         for (uint32 i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
         {
-            if (!player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+            auto item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
+            if (!item)
             {
                 continue;
             }
 
-            player->DestroyItem(INVENTORY_SLOT_BAG_0, i, true);
-            deleted++;
+            if (sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
+            {
+                SetItemFlagged(item, true);
+                flagged++;
+            }
+
+            if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Equipped", false))
+            {
+                player->DestroyItem(INVENTORY_SLOT_BAG_0, i, true);
+                deleted++;
+            }
         }
     }
 
-    // Delete items in additional bags
-    if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Inventory.Bags", true))
+    // Additional bags
+    if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Inventory.Bags", false) ||
+        sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
     {
         for (uint32 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
         {
@@ -562,59 +585,108 @@ uint32 PrestigeHandler::DeleteItems(Player* player)
 
             for (uint32 j = 0; j < bag->GetBagSize(); ++j)
             {
-                if (!player->GetItemByPos(i, j))
+                auto item = player->GetItemByPos(i, j);
+                if (!item)
                 {
                     continue;
                 }
 
-                player->DestroyItem(i, j, true);
+                if (sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
+                {
+                    SetItemFlagged(item, true);
+                    flagged++;
+                }
+
+                if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Equipped", false))
+                {
+                    player->DestroyItem(i, j, true);
+                    deleted++;
+                }
+            }
+        }
+    }
+
+    // Items from the buyback tab
+    if (sConfigMgr->GetOption<bool>("Prestigious.Delete.BuyBack", false) ||
+        sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
+    {
+        for (uint32 i = BUYBACK_SLOT_START; i < BUYBACK_SLOT_END; ++i)
+        {
+            if (sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
+            {
+                auto item = player->GetItemFromBuyBackSlot(i);
+                if (!item)
+                {
+                    continue;
+                }
+
+                SetItemFlagged(item, true);
+                flagged++;
+            }
+
+            if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Equipped", false))
+            {
+                player->RemoveItemFromBuyBackSlot(i, true);
                 deleted++;
             }
         }
     }
 
-    // Delete items from the buyback tab
-    if (sConfigMgr->GetOption<bool>("Prestigious.Delete.BuyBack", true))
-    {
-        for (uint32 i = BUYBACK_SLOT_START; i < BUYBACK_SLOT_END; ++i)
-        {
-            player->RemoveItemFromBuyBackSlot(i, true);
-            deleted++;
-        }
-    }
-
-    // Delete items from the keyring
-    if (sConfigMgr->GetOption<bool>("Prestigious.Delete.KeyRing", true))
+    // Items from the keyring
+    if (sConfigMgr->GetOption<bool>("Prestigious.Delete.KeyRing", false) ||
+        sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
     {
         for (uint32 i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; ++i)
         {
-            if (!player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+            auto item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
+            if (!item)
             {
                 continue;
             }
 
-            player->DestroyItem(INVENTORY_SLOT_BAG_0, i, true);
-            deleted++;
+            if (sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
+            {
+                SetItemFlagged(item, true);
+                flagged++;
+            }
+
+            if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Equipped", false))
+            {
+                player->DestroyItem(INVENTORY_SLOT_BAG_0, i, true);
+                deleted++;
+            }
         }
     }
 
-    // Delete items from the main bank slots
-    if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Bank", true))
+    // Items from the main bank slots
+    if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Bank", false) ||
+        sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
     {
         for (uint32 i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; ++i)
         {
-            if (!player->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
+            auto item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);
+            if (!item)
             {
                 continue;
             }
 
-            player->DestroyItem(INVENTORY_SLOT_BAG_0, i, true);
-            deleted++;
+            if (sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
+            {
+                SetItemFlagged(item, true);
+                flagged++;
+            }
+
+            if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Equipped", false))
+            {
+                player->DestroyItem(INVENTORY_SLOT_BAG_0, i, true);
+                deleted++;
+            }
         }
     }
 
-    // Delete items from the additional bank bag slots
-    if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Bank.Bags", true))
+    // Items from the additional bank bag slots
+    if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Bank.Bags", false) ||
+        sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
     {
         for (uint32 i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; ++i)
         {
@@ -627,18 +699,29 @@ uint32 PrestigeHandler::DeleteItems(Player* player)
 
             for (uint32 j = 0; j < bag->GetBagSize(); ++j)
             {
-                if (!player->GetItemByPos(i, j))
+                auto item = player->GetItemByPos(i, j);
+                if (!item)
                 {
                     continue;
                 }
 
-                player->DestroyItem(i, j, true);
-                deleted++;
+                if (sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
+                {
+                    SetItemFlagged(item, true);
+                    flagged++;
+                }
+
+                if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Equipped", false))
+                {
+                    player->DestroyItem(i, j, true);
+                    deleted++;
+                }
             }
         }
     }
 
     LOG_INFO("module", "Prestige> {} player items were deleted.", deleted);
+    LOG_INFO("module", "Prestige> {} player items were flagged.", flagged);
 
     return avgLevel;
 }
