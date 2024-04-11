@@ -740,6 +740,15 @@ void PrestigeHandler::EquipDefaultItems(Player* player)
             continue;
         }
 
+        // Check if the item can be stored, to prevent worldserver error
+        ItemPosCountVec sDest;
+        auto result = player->CanStoreNewItem(INVENTORY_SLOT_BAG_0, NULL_SLOT, sDest, itemEntry, 1);
+
+        if (result != EQUIP_ERR_OK)
+        {
+            continue;
+        }
+
         player->StoreNewItemInBestSlots(itemEntry, 1);
     }
 }
