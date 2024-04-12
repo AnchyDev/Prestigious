@@ -1049,9 +1049,9 @@ bool PrestigeHandler::UnequipItems(Player* player)
 
         player->RemoveItem(INVENTORY_SLOT_BAG_0, i, true);
         player->StoreItem(newDest, item, true);
-
-        return true;
     }
+
+    return true;
 }
 
 TaskScheduler* PrestigeHandler::GetScheduler()
