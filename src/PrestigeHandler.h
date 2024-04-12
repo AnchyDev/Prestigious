@@ -55,9 +55,13 @@ public:
     void SetItemFlagged(Item* /*item*/, bool /*flag*/);
     void UnflagItems(Player* /*player*/);
 
+    TaskScheduler* GetScheduler();
+
 private:
     std::unordered_map<Races, std::unordered_set<uint32>> racialMap;
     std::unordered_map<Classes, std::unordered_set<uint32>> spellMap;
+
+    TaskScheduler scheduler;
 };
 
 #define sPrestigeHandler PrestigeHandler::GetInstance()

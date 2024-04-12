@@ -268,7 +268,7 @@ void PrestigeHandler::DoPrestige(Player* player)
     ResetQuests(player);
     ResetHomebindAndPosition(player);
 
-    // There are internal checks here for deleting items.
+    // There are internal checks inside IterateItems for deleting/flagging items.
     uint32 avgLevel = IterateItems(player);
 
     EquipDefaultItems(player);
@@ -285,14 +285,7 @@ void PrestigeHandler::DoPrestige(Player* player)
         RewardPlayer(player, avgLevel);
     }
 
-    // Update DB for removed spells.
     player->SaveToDB(false, false);
-
-    //LearnRacials(player);
-    //LearnClassSpells(player);
-
-    // Update DB with new spells.
-    //player->SaveToDB(false, false);
 }
 
 void PrestigeHandler::ResetLevel(Player* player)
@@ -525,13 +518,30 @@ void PrestigeHandler::ResetActionbar(Player* player)
         player->removeActionButton(i);
     }
 
-    // Repopulate actionbar
-    for (auto it = pInfo->action.begin(); it != pInfo->action.end(); ++it)
-    {
-        player->addActionButton(it->button, it->action, it->type);
-    }
+    // Clear actions on client-side
+    player->SendActionButtons(2);
 
-    player->SendActionButtons(1);
+    scheduler.Schedule(1s, [this, player, pInfo](TaskContext context) {
+        if (!player || !pInfo)
+        {
+            return;
+        }
+
+        // Repopulate actionbar
+        for (auto it = pInfo->action.begin(); it != pInfo->action.end(); ++it)
+        {
+            auto actionButton = player->addActionButton(it->button, it->action, it->type);
+            if (!actionButton)
+            {
+                continue;
+            }
+
+            actionButton->uState = ACTIONBUTTON_NEW;
+        }
+
+        // Send new actions to client
+        player->SendActionButtons(1);
+    });
 }
 
 uint32 PrestigeHandler::IterateItems(Player* player)
@@ -1039,4 +1049,9 @@ bool PrestigeHandler::UnequipItems(Player* player)
 
         return true;
     }
+}
+
+TaskScheduler* PrestigeHandler::GetScheduler()
+{
+    return &scheduler;
 }
