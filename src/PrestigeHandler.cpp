@@ -521,6 +521,7 @@ void PrestigeHandler::ResetActionbar(Player* player)
     // Clear actions on client-side
     player->SendActionButtons(2);
 
+    // Schedule the new actions for 1s in the future to fix actions being deleted by client
     scheduler.Schedule(1s, [this, player, pInfo](TaskContext context) {
         if (!player || !pInfo)
         {
