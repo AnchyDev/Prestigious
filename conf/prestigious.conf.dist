@@ -97,3 +97,12 @@ Prestigious.Unequip.Equipped = 1
 #
 
 Prestigious.FlagItems = 1
+
+#
+#   Prestigious.ResetActionbar
+#        Description: Resets the players actionbar when prestiging.
+#                     0 - Disabled
+#        Default:     1 - Enabled
+#
+
+Prestigious.ResetActionbar = 1

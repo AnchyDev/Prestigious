@@ -275,7 +275,11 @@ void PrestigeHandler::DoPrestige(Player* player, bool sacrificeArmor)
 
     UnlearnAllSpells(player);
     DesummonMinion(player);
-    ResetActionbar(player);
+
+    if (sConfigMgr->GetOption<bool>("Prestigious.ResetActionbar", true))
+    {
+        ResetActionbar(player);
+    }
 
     ResetLevel(player);
 
