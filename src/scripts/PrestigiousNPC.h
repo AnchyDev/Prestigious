@@ -14,10 +14,13 @@ private:
 
 private:
     enum PrestigiousConstants {
-        PRESTIGE_DO_PRESTIGE = 1,
+        PRESTIGE_OPTIONS = 1,
+        PRESTIGE_DO_PRESTIGE = 2,
+        PRESTIGE_DO_PRESTIGE_SACRIFICE = 3,
 
         PRESTIGE_TEXT_CANNOT_PRESTIGE = 555123,
         PRESTIGE_TEXT_CAN_PRESTIGE = 555124,
+        PRESTIGE_TEXT_OPTIONS = 555125,
 
         SPELL_FREEZE = 9454
     };

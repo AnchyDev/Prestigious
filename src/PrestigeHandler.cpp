@@ -244,7 +244,7 @@ bool PrestigeHandler::CanPrestige(Player* player)
     return true;
 }
 
-void PrestigeHandler::DoPrestige(Player* player)
+void PrestigeHandler::DoPrestige(Player* player, bool sacrificeArmor)
 {
     if (!player ||
         !player->GetGUID() ||
@@ -254,7 +254,7 @@ void PrestigeHandler::DoPrestige(Player* player)
         return;
     }
 
-    if (sConfigMgr->GetOption<bool>("Prestigious.Unequip.Equipped", true))
+    if (!sacrificeArmor)
     {
         bool result = UnequipItems(player);
 
@@ -269,7 +269,7 @@ void PrestigeHandler::DoPrestige(Player* player)
     ResetHomebindAndPosition(player);
 
     // There are internal checks inside IterateItems for deleting/flagging items.
-    uint32 avgLevel = IterateItems(player);
+    uint32 avgLevel = IterateItems(player, sacrificeArmor);
 
     EquipDefaultItems(player);
 
@@ -279,10 +279,9 @@ void PrestigeHandler::DoPrestige(Player* player)
 
     ResetLevel(player);
 
-    if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Equipped", true) &&
-        sConfigMgr->GetOption<bool>("Prestigious.Delete.Equipped.Reward", true))
+    if (sacrificeArmor)
     {
-        RewardPlayer(player, avgLevel);
+        player->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_UNK31);
     }
 
     player->SaveToDB(false, false);
@@ -521,8 +520,11 @@ void PrestigeHandler::ResetActionbar(Player* player)
     // Clear actions on client-side
     player->SendActionButtons(2);
 
-    // Schedule the new actions for 1s in the future to fix actions being deleted by client
-    scheduler.Schedule(1s, [this, player, pInfo](TaskContext context) {
+    // TODO: If a player is lagging this may cause problems, maybe schedule even longer.
+    auto scheduleDelay = player->GetSession()->GetLatency() * 2;
+
+    // Schedule the new actions the future to fix actions being deleted by client
+    scheduler.Schedule(1000ms + std::chrono::milliseconds(scheduleDelay), [this, player, pInfo](TaskContext context) {
         if (!player || !pInfo)
         {
             return;
@@ -545,7 +547,7 @@ void PrestigeHandler::ResetActionbar(Player* player)
     });
 }
 
-uint32 PrestigeHandler::IterateItems(Player* player)
+uint32 PrestigeHandler::IterateItems(Player* player, bool deleteEquipped)
 {
     LOG_INFO("module", "Prestige> Deleting/flagging player items..");
 
@@ -554,7 +556,7 @@ uint32 PrestigeHandler::IterateItems(Player* player)
     uint32 avgLevel = 0;
 
     // Equipped items
-    if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Equipped", false) ||
+    if (deleteEquipped ||
         sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
     {
         for (uint32 i = 0; i < INVENTORY_SLOT_BAG_START; ++i)
@@ -576,7 +578,7 @@ uint32 PrestigeHandler::IterateItems(Player* player)
                 flagged++;
             }
 
-            if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Equipped", false))
+            if (deleteEquipped)
             {
                 player->DestroyItem(INVENTORY_SLOT_BAG_0, i, true);
                 deleted++;

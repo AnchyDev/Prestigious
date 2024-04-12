@@ -19,11 +19,12 @@ public:
 
     enum PrestigeHandlerConstants : uint32
     {
-        ITEM_FIELD_FLAG_PRESTIGE_LOCK = 0x80000000 // This is equivalent to ITEM_FIELD_FLAG_UNK26, which seems to be unused.
+        ITEM_FIELD_FLAG_PRESTIGE_LOCK = 0x80000000, // This is equivalent to ITEM_FIELD_FLAG_UNK26, which seems to be unused.
+        PLAYER_FLAGS_SACRIFICED = 0x80000000, // This is equivalent to PLAYER_FLAGS_UNK31, which seems to be unused.
     };
 
     bool CanPrestige(Player* /*player*/);
-    void DoPrestige(Player* /*player*/);
+    void DoPrestige(Player* /*player*/, bool /*sacrificeArmor*/);
 
     void ResetLevel(Player* /*player*/);
     void ResetQuests(Player* /*player*/);
@@ -35,12 +36,7 @@ public:
     void LearnRacials(Player* /*player*/);
     void LearnClassSpells(Player* /*player*/);
 
-    /// <summary>
-    /// Deletes/flags items from inventory, bank, buyback, keychain, bags, etc..
-    /// </summary>
-    /// <param name="player">The player to delete/flag the items from.</param>
-    /// <returns>The average item level of deleted/flagged equipment.</returns>
-    uint32 IterateItems(Player* /*player*/);
+    uint32 IterateItems(Player* /*player*/, bool /*deleteEquipped*/);
     void EquipDefaultItems(Player* /*player*/);
     bool UnequipItems(Player* /*player*/);
 
