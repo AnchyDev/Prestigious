@@ -271,6 +271,11 @@ void PrestigeHandler::DoPrestige(Player* player, bool sacrificeArmor)
     // There are internal checks inside IterateItems for deleting/flagging items.
     uint32 avgLevel = IterateItems(player, sacrificeArmor);
 
+    if (sacrificeArmor)
+    {
+        StoreItemLevel(player, avgLevel);
+    }
+
     EquipDefaultItems(player);
 
     UnlearnAllSpells(player);
@@ -589,7 +594,7 @@ uint32 PrestigeHandler::IterateItems(Player* player, bool deleteEquipped)
             }
         }
 
-        avgLevel = avgLevel / 19; // 19: Equipment Slot Count
+        avgLevel = std::ceil(double(avgLevel) / 19.0); // 19: Equipment Slot Count
     }
 
     // Default bag items
@@ -1061,4 +1066,41 @@ bool PrestigeHandler::UnequipItems(Player* player)
 TaskScheduler* PrestigeHandler::GetScheduler()
 {
     return &scheduler;
+}
+
+void PrestigeHandler::StoreItemLevel(Player* player, uint32 avgLevel)
+{
+    if (!player || !player->GetGUID())
+    {
+        return;
+    }
+
+    uint32 guid = player->GetGUID().GetRawValue();
+
+    auto it = playerItemLevelMap.find(guid);
+    if (it == playerItemLevelMap.end())
+    {
+        playerItemLevelMap.emplace(guid, avgLevel);
+        return;
+    }
+
+    it->second = avgLevel;
+}
+
+uint32 PrestigeHandler::GetStoredItemLevel(Player* player)
+{
+    if (!player || !player->GetGUID())
+    {
+        return 0;
+    }
+
+    uint32 guid = player->GetGUID().GetRawValue();
+
+    auto it = playerItemLevelMap.find(guid);
+    if (it == playerItemLevelMap.end())
+    {
+        return 0;
+    }
+
+    return it->second;
 }

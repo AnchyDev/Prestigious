@@ -16,7 +16,15 @@ void PrestigiousPlayerScript::OnLevelChanged(Player* player, uint8 /*oldLevel*/)
     if (player->HasFlag(PLAYER_FLAGS, sPrestigeHandler->PLAYER_FLAGS_SACRIFICED))
     {
         player->RemoveFlag(PLAYER_FLAGS, sPrestigeHandler->PLAYER_FLAGS_SACRIFICED);
-        sPrestigeHandler->RewardPlayer(player, 200);
+
+        uint32 itemLevel = sPrestigeHandler->GetStoredItemLevel(player);
+        if (!itemLevel)
+        {
+            player->SendSystemMessage("|cffFF0000Failed to get your sacrificed item level so no reward could be calculated, contact an administrator to resolve.|r");
+            return;
+        }
+
+        sPrestigeHandler->RewardPlayer(player, itemLevel);
     }
 
     sPrestigeHandler->UnflagItems(player);
