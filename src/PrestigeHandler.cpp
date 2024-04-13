@@ -533,7 +533,7 @@ void PrestigeHandler::ResetActionbar(Player* player)
     auto scheduleDelay = player->GetSession()->GetLatency() * 2;
 
     // Schedule the new actions the future to fix actions being deleted by client
-    scheduler.Schedule(1000ms + std::chrono::milliseconds(scheduleDelay), [this, player, pInfo](TaskContext context) {
+    scheduler.Schedule(1000ms + std::chrono::milliseconds(scheduleDelay), [this, player, pInfo](TaskContext /*context*/) {
         if (!player || !pInfo)
         {
             return;
