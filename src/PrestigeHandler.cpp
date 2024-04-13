@@ -1068,6 +1068,47 @@ TaskScheduler* PrestigeHandler::GetScheduler()
     return &scheduler;
 }
 
+void PrestigeHandler::LoadStoredItemLevels()
+{
+    LOG_INFO("module", "Loading stored item levels from 'prestige_sacrificed' table..");
+
+    auto qResult = CharacterDatabase.Query("SELECT * FROM `prestige_sacrificed`");
+
+    if (!qResult)
+    {
+        return;
+    }
+
+    playerItemLevelMap.clear();
+
+    do
+    {
+        auto fields = qResult->Fetch();
+
+        auto guid = fields[0].Get<uint32>();
+        auto itemLevel = fields[1].Get<uint32>();
+
+        playerItemLevelMap.emplace(guid, itemLevel);
+    } while (qResult->NextRow());
+
+    LOG_INFO("module", ">> Loaded '{}' item levels.", playerItemLevelMap.size());
+}
+
+void PrestigeHandler::SaveStoredItemLevels()
+{
+    LOG_INFO("module", "Saving stored item levels into 'prestige_sacrificed' table..");
+
+    uint32 saved = 0;
+
+    for (auto& entry : playerItemLevelMap)
+    {
+        CharacterDatabase.Execute("INSERT INTO prestige_sacrificed (player, itemlevel) VALUES ({}, {}) ON DUPLICATE KEY UPDATE player={}, itemlevel={}", entry.first, entry.second, entry.first, entry.second);
+        saved++;
+    }
+
+    LOG_INFO("module", ">> Saved '{}' item levels.", playerItemLevelMap.size());
+}
+
 void PrestigeHandler::StoreItemLevel(Player* player, uint32 avgLevel)
 {
     if (!player || !player->GetGUID())

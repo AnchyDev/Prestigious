@@ -51,6 +51,8 @@ public:
     void SetItemFlagged(Item* /*item*/, bool /*flag*/);
     void UnflagItems(Player* /*player*/);
 
+    void LoadStoredItemLevels();
+    void SaveStoredItemLevels();
     void StoreItemLevel(Player* /*player*/, uint32 /*avgLevel*/);
     uint32 GetStoredItemLevel(Player* /*player*/);
 

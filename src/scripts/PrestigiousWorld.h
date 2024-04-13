@@ -10,6 +10,8 @@ public:
 
 private:
     void OnUpdate(uint32 /*diff*/) override;
+    void OnAfterConfigLoad(bool /*reload*/) override;
+    void OnShutdown() override;
 };
 
 #endif // MODULE_PRESTIGIOUS_WORLD_H
