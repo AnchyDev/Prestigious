@@ -1,5 +1,6 @@
 #include "PrestigiousPlayer.h"
 #include "PrestigeHandler.h"
+#include <ScriptedGossip.h>
 
 void PrestigiousPlayerScript::OnLevelChanged(Player* player, uint8 /*oldLevel*/)
 {
@@ -45,4 +46,15 @@ bool PrestigiousPlayerScript::CanEquipItem(Player* player, uint8 /*slot*/, uint1
     }
 
     return true;
+}
+
+void PrestigiousPlayerScript::OnEquip(Player* player, Item* /*it*/, uint8 /*bag*/, uint8 /*slot*/, bool /*update*/)
+{
+    if (!player)
+    {
+        return;
+    }
+
+    // Avoids exploits with switching gear while menu is open
+    CloseGossipMenuFor(player);
 }
