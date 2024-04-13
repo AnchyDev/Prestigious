@@ -583,8 +583,12 @@ uint32 PrestigeHandler::IterateItems(Player* player, bool deleteEquipped)
 
             if (sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
             {
-                SetItemFlagged(item, true);
-                flagged++;
+                // Do not flag heirloom items
+                if (!IsHeirloom(item))
+                {
+                    SetItemFlagged(item, true);
+                    flagged++;
+                }
             }
 
             if (deleteEquipped)
@@ -875,6 +879,22 @@ bool PrestigeHandler::IsRecipe(uint32 spellId)
     }
 
     return true;
+}
+
+bool PrestigeHandler::IsHeirloom(Item* item)
+{
+    if (!item)
+    {
+        return false;
+    }
+
+    auto itemProto = item->GetTemplate();
+    if (!itemProto)
+    {
+        return false;
+    }
+
+    return itemProto->Quality == ITEM_QUALITY_HEIRLOOM;
 }
 
 void PrestigeHandler::RewardPlayer(Player* player, uint32 avgLevel)
