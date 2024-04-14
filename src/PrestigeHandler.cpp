@@ -1114,6 +1114,28 @@ void PrestigeHandler::LoadStoredItemLevels()
     LOG_INFO("module", ">> Loaded '{}' item levels.", playerItemLevelMap.size());
 }
 
+void PrestigeHandler::SaveStoredItemLevel(Player* player)
+{
+    if (!player)
+    {
+        return;
+    }
+
+    auto guid = player->GetGUID();
+    if (!guid)
+    {
+        return;
+    }
+
+    auto entry = playerItemLevelMap.find(guid.GetRawValue());
+    if (entry == playerItemLevelMap.end())
+    {
+        return;
+    }
+
+    CharacterDatabase.Execute("INSERT INTO prestige_sacrificed (player, itemlevel) VALUES ({}, {}) ON DUPLICATE KEY UPDATE player={}, itemlevel={}", entry->first, entry->second, entry->first, entry->second);
+}
+
 void PrestigeHandler::SaveStoredItemLevels()
 {
     LOG_INFO("module", "Saving stored item levels into 'prestige_sacrificed' table..");

@@ -1,9 +1,16 @@
 #include "PrestigiousPlayer.h"
 #include "PrestigeHandler.h"
+
+#include "Config.h"
 #include <ScriptedGossip.h>
 
 void PrestigiousPlayerScript::OnLevelChanged(Player* player, uint8 /*oldLevel*/)
 {
+    if (!sConfigMgr->GetOption<bool>("Prestigious.Enable", true))
+    {
+        return;
+    }
+
     if (!player)
     {
         return;
@@ -33,6 +40,11 @@ void PrestigiousPlayerScript::OnLevelChanged(Player* player, uint8 /*oldLevel*/)
 
 bool PrestigiousPlayerScript::CanEquipItem(Player* player, uint8 /*slot*/, uint16& /*dest*/, Item* pItem, bool /*swap*/, bool /*not_loading*/)
 {
+    if (!sConfigMgr->GetOption<bool>("Prestigious.Enable", true))
+    {
+        return true;
+    }
+
     if (!player || !pItem)
     {
         return true;
@@ -50,6 +62,11 @@ bool PrestigiousPlayerScript::CanEquipItem(Player* player, uint8 /*slot*/, uint1
 
 void PrestigiousPlayerScript::OnEquip(Player* player, Item* /*it*/, uint8 /*bag*/, uint8 /*slot*/, bool /*update*/)
 {
+    if (!sConfigMgr->GetOption<bool>("Prestigious.Enable", true))
+    {
+        return;
+    }
+
     if (!player)
     {
         return;
@@ -57,4 +74,19 @@ void PrestigiousPlayerScript::OnEquip(Player* player, Item* /*it*/, uint8 /*bag*
 
     // Avoids exploits with switching gear while menu is open
     CloseGossipMenuFor(player);
+}
+
+void PrestigiousPlayerScript::OnSave(Player* player)
+{
+    if (!sConfigMgr->GetOption<bool>("Prestigious.Enable", true))
+    {
+        return;
+    }
+
+    if (!player)
+    {
+        return;
+    }
+
+    sPrestigeHandler->SaveStoredItemLevel(player);
 }
