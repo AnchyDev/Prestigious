@@ -16,8 +16,3 @@ void PrestigiousWorldScript::OnAfterConfigLoad(bool reload)
 
     sPrestigeHandler->LoadStoredItemLevels();
 }
-
-void PrestigiousWorldScript::OnShutdown()
-{
-    sPrestigeHandler->SaveStoredItemLevels();
-}
