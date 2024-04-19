@@ -13,5 +13,5 @@ void PrestigiousWorldScript::OnAfterConfigLoad(bool /*reload*/)
 
 void PrestigiousWorldScript::OnShutdownInitiate(ShutdownExitCode /*code*/, ShutdownMask /*mask*/)
 {
-	sPrestigeHandler->SavePrestigeLevels();
+    sPrestigeHandler->SavePrestigeLevels();
 }
