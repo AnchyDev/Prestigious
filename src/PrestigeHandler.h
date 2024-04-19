@@ -4,6 +4,12 @@
 #include "Player.h"
 #include "TaskScheduler.h"
 
+struct PrestigeReward
+{
+    uint32 Entry;
+    uint32 Count;
+};
+
 class PrestigeHandler
 {
 private:
@@ -47,6 +53,7 @@ public:
     bool IsRecipe(uint32 /*spellId*/);
     bool IsHeirloom(Item* /*item*/);
 
+    void RewardPlayer(Player* /*player*/, float /*multiplier*/);
     void SacrificeRewardPlayer(Player* /*player*/, uint32 /*avgLevel*/);
 
     void SetItemFlagged(Item* /*item*/, bool /*flag*/);
@@ -54,11 +61,14 @@ public:
 
     float GetMultiplierForItemLevel(uint32 /*itemLevel*/);
 
+    void LoadRewards();
+
     TaskScheduler* GetScheduler();
 
 private:
     std::unordered_map<Races, std::unordered_set<uint32>> racialMap;
     std::unordered_map<Classes, std::unordered_set<uint32>> spellMap;
+    std::vector<PrestigeReward> rewards;
 
     TaskScheduler scheduler;
 };

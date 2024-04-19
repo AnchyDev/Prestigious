@@ -274,7 +274,15 @@ void PrestigeHandler::DoPrestige(Player* player, bool sacrificeArmor)
     if (sacrificeArmor)
     {
         uint32 avgLevel = player->GetAverageItemLevel();
-        sPrestigeHandler->SacrificeRewardPlayer(player, avgLevel);
+        SacrificeRewardPlayer(player, avgLevel);
+
+        LOG_INFO("module", "Rewarded player '{}' for sacrificing gear during prestige.", player->GetName());
+    }
+    else
+    {
+        RewardPlayer(player, 1.0f);
+
+        LOG_INFO("module", "Rewarded player '{}' for prestiging.", player->GetName());
     }
 
     EquipDefaultItems(player);
@@ -888,14 +896,21 @@ bool PrestigeHandler::IsHeirloom(Item* item)
     return itemProto->Quality == ITEM_QUALITY_HEIRLOOM;
 }
 
+void PrestigeHandler::RewardPlayer(Player* player, float multiplier)
+{
+    for (auto reward : rewards)
+    {
+        player->SendItemRetrievalMail(reward.Entry, reward.Count * multiplier);
+
+        LOG_INFO("module", "Adding reward '{}' with count '{}' to player '{}'.", reward.Entry, reward.Count * multiplier, player->GetName());
+    }
+}
+
 void PrestigeHandler::SacrificeRewardPlayer(Player* player, uint32 avgLevel)
 {
     float multiplier = GetMultiplierForItemLevel(avgLevel);
 
-    uint32 rewardCount = 1 * multiplier;
-
-    player->SendSystemMessage(Acore::StringFormatFmt("|cffFFFFFFYou were rewarded |cff00FF00{}|cffFFFFFF currency for your average item level of |cff00FF00{}|cffFFFFFF.|r", rewardCount, avgLevel));
-    player->AddItem(37711, rewardCount);
+    RewardPlayer(player, multiplier);
 }
 
 void PrestigeHandler::SetItemFlagged(Item* item, bool flag)
@@ -1039,36 +1054,53 @@ float PrestigeHandler::GetMultiplierForItemLevel(uint32 itemLevel)
 {
     float multiplier = 1.0f;
 
-    if (itemLevel >= 200)
+    std::map<uint32, float> brackets = {
+        {200, 1.0f},
+        {216, 2.0f},
+        {232, 3.0f},
+        {245, 4.0f},
+        {251, 5.0f},
+        {264, 6.0f},
+        {270, 7.0f}
+    };
+
+    for (const auto& [bracket, value] : brackets)
     {
-        multiplier += sConfigMgr->GetOption<float>("Prestigious.Reward.Multiplier.Bracket.200", 1.0f);
-    }
-    else if (itemLevel >= 216)
-    {
-        multiplier += sConfigMgr->GetOption<float>("Prestigious.Reward.Multiplier.Bracket.216", 2.0f);
-    }
-    else if (itemLevel >= 232)
-    {
-        multiplier += sConfigMgr->GetOption<float>("Prestigious.Reward.Multiplier.Bracket.232", 3.0f);
-    }
-    else if (itemLevel >= 245)
-    {
-        multiplier += sConfigMgr->GetOption<float>("Prestigious.Reward.Multiplier.Bracket.245", 4.0f);
-    }
-    else if (itemLevel >= 251)
-    {
-        multiplier += sConfigMgr->GetOption<float>("Prestigious.Reward.Multiplier.Bracket.251", 5.0f);
-    }
-    else if (itemLevel >= 264)
-    {
-        multiplier += sConfigMgr->GetOption<float>("Prestigious.Reward.Multiplier.Bracket.264", 6.0f);
-    }
-    else if (itemLevel >= 270)
-    {
-        multiplier += sConfigMgr->GetOption<float>("Prestigious.Reward.Multiplier.Bracket.270", 7.0f);
+        if (itemLevel >= bracket)
+        {
+            multiplier = sConfigMgr->GetOption<float>("Prestigious.Reward.Multiplier.Bracket." + std::to_string(bracket), value);
+        }
     }
 
     return multiplier;
+}
+
+void PrestigeHandler::LoadRewards()
+{
+    LOG_INFO("module", "Loading rewards from 'prestige_rewards' table..");
+
+    auto qResult = WorldDatabase.Query("SELECT * FROM `prestige_rewards`");
+
+    if (!qResult)
+    {
+        return;
+    }
+
+    rewards.clear();
+
+    do
+    {
+        auto fields = qResult->Fetch();
+
+        PrestigeReward reward;
+
+        reward.Entry = fields[0].Get<uint32>();
+        reward.Count = fields[1].Get<uint32>();
+
+        rewards.push_back(reward);
+    } while (qResult->NextRow());
+
+    LOG_INFO("module", ">> Loaded '{}' item levels.", rewards.size());
 }
 
 bool PrestigeHandler::UnequipItems(Player* player)
