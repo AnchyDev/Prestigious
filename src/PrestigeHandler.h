@@ -47,23 +47,16 @@ public:
     bool IsRecipe(uint32 /*spellId*/);
     bool IsHeirloom(Item* /*item*/);
 
-    void RewardPlayer(Player* /*player*/, uint32 /*avgLevel*/);
+    void SacrificeRewardPlayer(Player* /*player*/, uint32 /*avgLevel*/);
 
     void SetItemFlagged(Item* /*item*/, bool /*flag*/);
     void UnflagItems(Player* /*player*/);
-
-    void LoadStoredItemLevels();
-    void SaveStoredItemLevel(Player* /*player*/);
-    void SaveStoredItemLevels();
-    void StoreItemLevel(Player* /*player*/, uint32 /*avgLevel*/);
-    uint32 GetStoredItemLevel(Player* /*player*/);
 
     TaskScheduler* GetScheduler();
 
 private:
     std::unordered_map<Races, std::unordered_set<uint32>> racialMap;
     std::unordered_map<Classes, std::unordered_set<uint32>> spellMap;
-    std::unordered_map<uint32, uint32> playerItemLevelMap;
 
     TaskScheduler scheduler;
 };

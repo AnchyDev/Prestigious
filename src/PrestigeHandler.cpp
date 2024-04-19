@@ -273,7 +273,7 @@ void PrestigeHandler::DoPrestige(Player* player, bool sacrificeArmor)
 
     if (sacrificeArmor)
     {
-        StoreItemLevel(player, avgLevel);
+        sPrestigeHandler->SacrificeRewardPlayer(player, avgLevel);
     }
 
     EquipDefaultItems(player);
@@ -563,6 +563,7 @@ uint32 PrestigeHandler::IterateItems(Player* player, bool deleteEquipped)
     uint32 flagged = 0;
     uint32 deleted = 0;
     uint32 avgLevel = 0;
+    uint32 avgCount = 0;
 
     // Equipped items
     if (deleteEquipped ||
@@ -578,7 +579,12 @@ uint32 PrestigeHandler::IterateItems(Player* player, bool deleteEquipped)
 
             if (auto itemProto = item->GetTemplate())
             {
-                avgLevel += itemProto->ItemLevel;
+                // don't check tabard, ranged, offhand or shirt
+                if (i != EQUIPMENT_SLOT_TABARD && i != EQUIPMENT_SLOT_RANGED && i != EQUIPMENT_SLOT_OFFHAND && i != EQUIPMENT_SLOT_BODY)
+                {
+                    avgLevel += itemProto->GetItemLevelIncludingQuality(player->GetLevel());
+                    avgCount++;
+                }
             }
 
             if (sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
@@ -598,7 +604,7 @@ uint32 PrestigeHandler::IterateItems(Player* player, bool deleteEquipped)
             }
         }
 
-        avgLevel = std::ceil(double(avgLevel) / 19.0); // 19: Equipment Slot Count
+        avgLevel = std::max<float>(0.0f, avgLevel / (float)avgCount);
     }
 
     // Default bag items
@@ -897,7 +903,7 @@ bool PrestigeHandler::IsHeirloom(Item* item)
     return itemProto->Quality == ITEM_QUALITY_HEIRLOOM;
 }
 
-void PrestigeHandler::RewardPlayer(Player* player, uint32 avgLevel)
+void PrestigeHandler::SacrificeRewardPlayer(Player* player, uint32 avgLevel)
 {
     uint32 rewardCount = 1;
     uint32 multiplier = 1;
@@ -1086,104 +1092,4 @@ bool PrestigeHandler::UnequipItems(Player* player)
 TaskScheduler* PrestigeHandler::GetScheduler()
 {
     return &scheduler;
-}
-
-void PrestigeHandler::LoadStoredItemLevels()
-{
-    LOG_INFO("module", "Loading stored item levels from 'prestige_sacrificed' table..");
-
-    auto qResult = CharacterDatabase.Query("SELECT * FROM `prestige_sacrificed`");
-
-    if (!qResult)
-    {
-        return;
-    }
-
-    playerItemLevelMap.clear();
-
-    do
-    {
-        auto fields = qResult->Fetch();
-
-        auto guid = fields[0].Get<uint32>();
-        auto itemLevel = fields[1].Get<uint32>();
-
-        playerItemLevelMap.emplace(guid, itemLevel);
-    } while (qResult->NextRow());
-
-    LOG_INFO("module", ">> Loaded '{}' item levels.", playerItemLevelMap.size());
-}
-
-void PrestigeHandler::SaveStoredItemLevel(Player* player)
-{
-    if (!player)
-    {
-        return;
-    }
-
-    auto guid = player->GetGUID();
-    if (!guid)
-    {
-        return;
-    }
-
-    auto entry = playerItemLevelMap.find(guid.GetRawValue());
-    if (entry == playerItemLevelMap.end())
-    {
-        return;
-    }
-
-    CharacterDatabase.Execute("INSERT INTO prestige_sacrificed (player, itemlevel) VALUES ({}, {}) ON DUPLICATE KEY UPDATE player={}, itemlevel={}", entry->first, entry->second, entry->first, entry->second);
-}
-
-void PrestigeHandler::SaveStoredItemLevels()
-{
-    LOG_INFO("module", "Saving stored item levels into 'prestige_sacrificed' table..");
-
-    uint32 saved = 0;
-
-    for (auto& entry : playerItemLevelMap)
-    {
-        CharacterDatabase.Execute("INSERT INTO prestige_sacrificed (player, itemlevel) VALUES ({}, {}) ON DUPLICATE KEY UPDATE player={}, itemlevel={}", entry.first, entry.second, entry.first, entry.second);
-        saved++;
-    }
-
-    LOG_INFO("module", ">> Saved '{}' item levels.", playerItemLevelMap.size());
-}
-
-void PrestigeHandler::StoreItemLevel(Player* player, uint32 avgLevel)
-{
-    if (!player || !player->GetGUID())
-    {
-        return;
-    }
-
-    uint32 guid = player->GetGUID().GetRawValue();
-
-    auto it = playerItemLevelMap.find(guid);
-    if (it == playerItemLevelMap.end())
-    {
-        playerItemLevelMap.emplace(guid, avgLevel);
-        return;
-    }
-
-    it->second = avgLevel;
-}
-
-uint32 PrestigeHandler::GetStoredItemLevel(Player* player)
-{
-    if (!player || !player->GetGUID())
-    {
-        return 0;
-    }
-
-    uint32 guid = player->GetGUID().GetRawValue();
-
-    auto it = playerItemLevelMap.find(guid);
-    if (it == playerItemLevelMap.end())
-    {
-        return 0;
-    }
-
-    return it->second;
 }
