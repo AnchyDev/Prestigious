@@ -70,6 +70,9 @@ public:
     int32 GetPrestigeLevel(Player* /*player*/);
     void UpdatePrestigeLevel(Player* /*player*/, uint32 /*level*/);
 
+    void LoadWhitelistedQuests();
+    bool IsWhitelistedQuest(uint32 /*questId*/);
+
     void LoadRewards();
 
     TaskScheduler* GetScheduler();
@@ -79,6 +82,7 @@ private:
     std::unordered_map<Classes, std::unordered_set<uint32>> spellMap;
     std::vector<PrestigeReward> rewards;
     std::unordered_map<uint64, int32> prestigeLevels;
+    std::unordered_set<uint32> whitelistQuests;
 
     TaskScheduler scheduler;
 };

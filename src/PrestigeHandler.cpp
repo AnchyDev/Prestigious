@@ -470,6 +470,11 @@ void PrestigeHandler::ResetQuests(Player* player)
             continue;
         }
 
+        if (IsWhitelistedQuest(quest))
+        {
+            continue;
+        }
+
         player->SetQuestStatus(quest, QUEST_STATUS_NONE, true);
         player->RemoveRewardedQuest(quest, true);
     }
@@ -479,6 +484,11 @@ void PrestigeHandler::ResetQuests(Player* player)
     {
         auto quest = player->GetQuestSlotQuestId(questSlot);
         if (!quest)
+        {
+            continue;
+        }
+
+        if (IsWhitelistedQuest(quest))
         {
             continue;
         }
@@ -1274,6 +1284,34 @@ void PrestigeHandler::UpdatePrestigeLevel(Player* player, uint32 level)
     }
 
     it->second = level;
+}
+
+void PrestigeHandler::LoadWhitelistedQuests()
+{
+    LOG_INFO("module", "Loading quests from 'prestige_whitelist_quest' table..");
+
+    auto qResult = WorldDatabase.Query("SELECT * FROM `prestige_whitelist_quest`");
+
+    if (!qResult)
+    {
+        return;
+    }
+
+    whitelistQuests.clear();
+
+    do
+    {
+        auto fields = qResult->Fetch();
+
+        whitelistQuests.emplace(fields[0].Get<uint32>());
+    } while (qResult->NextRow());
+
+    LOG_INFO("module", ">> Loaded '{}' quests.", whitelistQuests.size());
+}
+
+bool PrestigeHandler::IsWhitelistedQuest(uint32 questId)
+{
+    return whitelistQuests.find(questId) != whitelistQuests.end();
 }
 
 void PrestigeHandler::LoadRewards()

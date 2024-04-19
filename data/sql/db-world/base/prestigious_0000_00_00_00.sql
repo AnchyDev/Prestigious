@@ -24,3 +24,22 @@ INSERT INTO `prestige_rewards` (`entry`, `count`, `scalable`, `prestige`, `comme
 	(34493, 1, 0, 1, 'Dragon Kite - Count 1 - Don\'t scale with multipliers - Reward at prestige 1'),
 	(37742, 200, 1, 0, 'Currency Test Token 2 - Count 200 - Scale with multipliers - Reward for all prestiges');
 
+CREATE TABLE IF NOT EXISTS `prestige_whitelist_quest` (
+  `quest_id` int NOT NULL,
+  `comment` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  PRIMARY KEY (`quest_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+DELETE FROM `prestige_whitelist_quest`;
+INSERT INTO `prestige_whitelist_quest` (`quest_id`, `comment`) VALUES
+	(24545, 'Shadowmourne - 1 - The Sacred and the Corrupt'),
+	(24547, 'Shadowmourne - 3 - A Feast of Souls'),
+	(24548, 'Shadowmourne - 7 - The Splintered Throne'),
+	(24549, 'Shadowmourne - 9 - Shadowmourne...'),
+	(24743, 'Shadowmourne - 2 - Shadow\'s Edge'),
+	(24748, 'Shadowmourne - 10 - The Lich King\'s Last Stand'),
+	(24749, 'Shadowmourne - 4 - Unholy Infusion'),
+	(24756, 'Shadowmourne - 5 - Blood Infusion'),
+	(24757, 'Shadowmourne - 6 - Frost Infusion'),
+	(24912, 'Shadowmourne - 8 - Empowerment');
+
