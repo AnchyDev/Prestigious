@@ -9,7 +9,7 @@ void PrestigiousWorldScript::OnUpdate(uint32 diff)
 void PrestigiousWorldScript::OnAfterConfigLoad(bool /*reload*/)
 {
     sPrestigeHandler->LoadRewards();
-	sPrestigeHandler->LoadPrestigeLevels();
+    sPrestigeHandler->LoadPrestigeLevels();
 }
 
 void PrestigiousWorldScript::OnShutdownInitiate(ShutdownExitCode /*code*/, ShutdownMask /*mask*/)
