@@ -927,9 +927,15 @@ void PrestigeHandler::RewardPlayer(Player* player, float multiplier)
 
     for (auto reward : rewards)
     {
+        // Invalid prestige level for reward
+        if (prestigeLevel < 0)
+        {
+            continue;
+        }
+
         // Skip rewards for specific prestige when not eligible.
         if (reward.PrestigeLevel != 0 &&
-            prestigeLevel != reward.PrestigeLevel)
+            unsigned(prestigeLevel) != reward.PrestigeLevel)
         {
             continue;
         }
