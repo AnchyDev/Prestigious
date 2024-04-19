@@ -29,6 +29,7 @@ public:
     {
         ITEM_FIELD_FLAG_PRESTIGE_LOCK = 0x80000000, // This is equivalent to ITEM_FIELD_FLAG_UNK26, which seems to be unused.
         PLAYER_FLAGS_SACRIFICED = 0x80000000, // This is equivalent to PLAYER_FLAGS_UNK31, which seems to be unused.
+        MAIL_SENDER_CHROMIE = 555111, // Used as the mail sender for rewards
     };
 
     bool CanPrestige(Player* /*player*/);
@@ -57,6 +58,7 @@ public:
 
     void RewardPlayer(Player* /*player*/, float /*multiplier*/);
     void SacrificeRewardPlayer(Player* /*player*/, uint32 /*avgLevel*/);
+    bool SendMailItems(Player* /*player*/, std::vector<std::pair<uint32, uint32>>& /*mailItems*/, std::string /*header*/, std::string /*body*/);
 
     void SetItemFlagged(Item* /*item*/, bool /*flag*/);
     void UnflagItems(Player* /*player*/);

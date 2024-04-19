@@ -129,3 +129,17 @@ Prestigious.Reward.Multiplier.Bracket.245 = 4
 Prestigious.Reward.Multiplier.Bracket.251 = 5
 Prestigious.Reward.Multiplier.Bracket.264 = 6
 Prestigious.Reward.Multiplier.Bracket.270 = 7
+
+#
+#   Prestigious.Reward.Mail.Title
+#        Description: This controls the title for the mail that is received for rewards.
+#
+
+Prestigious.Reward.Mail.Title = "Prestige Reward"
+
+#
+#   Prestigious.Reward.Mail.Body
+#        Description: This controls the body for the mail that is received for rewards.
+#
+
+Prestigious.Reward.Mail.Body = "You have been rewarded for prestiging."

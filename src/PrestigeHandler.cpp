@@ -268,7 +268,7 @@ void PrestigeHandler::DoPrestige(Player* player, bool sacrificeArmor)
     int32 prestigeLevel = GetPrestigeLevel(player);
     if (prestigeLevel == -1)
     {
-        player->SendSystemMessage("An error occured while trying to prestige: Failed to get prestige level. Contact AnchyDev!");
+        player->SendSystemMessage("An error occured while trying to prestige: Failed to get prestige level. Contact an Administrator!");
         return;
     }
 
@@ -908,6 +908,7 @@ bool PrestigeHandler::IsHeirloom(Item* item)
 void PrestigeHandler::RewardPlayer(Player* player, float multiplier)
 {
     auto prestigeLevel = GetPrestigeLevel(player);
+    std::vector<std::pair<uint32, uint32>> mailItems;
 
     for (auto reward : rewards)
     {
@@ -920,10 +921,23 @@ void PrestigeHandler::RewardPlayer(Player* player, float multiplier)
 
         auto count = reward.Scalable ? reward.Count * multiplier : reward.Count;
 
-        player->AddItem(reward.Entry, count);
+        mailItems.push_back(std::pair(reward.Entry, count));
 
         LOG_INFO("module", "Adding reward '{}' with count '{}' to player '{}'.", reward.Entry, reward.Count * multiplier, player->GetName());
     }
+
+    auto title = sConfigMgr->GetOption<std::string>("Prestigious.Reward.Mail.Title", "Prestige Reward");
+    auto body = sConfigMgr->GetOption<std::string>("Prestigious.Reward.Mail.Body", "You have been rewarded for prestiging.");
+
+    bool result = SendMailItems(player, mailItems, title, body);
+
+    if (!result)
+    {
+        player->SendSystemMessage("|cffFF0000Failed to mail rewards for prestige. Contact an Administrator!|r");
+        return;
+    }
+
+    player->SendSystemMessage("|cff00FF00You have been rewarded for prestiging, check your mailbox for your items.|r");
 }
 
 void PrestigeHandler::SacrificeRewardPlayer(Player* player, uint32 avgLevel)
@@ -931,6 +945,76 @@ void PrestigeHandler::SacrificeRewardPlayer(Player* player, uint32 avgLevel)
     float multiplier = GetMultiplierForItemLevel(avgLevel);
 
     RewardPlayer(player, multiplier);
+}
+
+bool PrestigeHandler::SendMailItems(Player* player, std::vector<std::pair<uint32, uint32>>& mailItems, std::string header, std::string body)
+{
+    using SendMailTempateVector = std::vector<std::pair<uint32, uint32>>;
+
+    std::vector<SendMailTempateVector> allItems;
+
+    auto AddMailItem = [&allItems](uint32 itemEntry, uint32 itemCount)
+        {
+            SendMailTempateVector toSendItems;
+
+            ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(itemEntry);
+            if (!itemTemplate)
+            {
+                LOG_ERROR("entities.player.items", "> PrestigeHandler::SendMailItems: Item id {} is invalid", itemEntry);
+                return false;
+            }
+
+            if (itemCount < 1 || (itemTemplate->MaxCount > 0 && itemCount > static_cast<uint32>(itemTemplate->MaxCount)))
+            {
+                LOG_ERROR("entities.player.items", "> PrestigeHandler::SendMailItems: Incorrect item count ({}) for item id {}", itemCount, itemEntry);
+                return false;
+            }
+
+            while (itemCount > itemTemplate->GetMaxStackSize())
+            {
+                if (toSendItems.size() <= MAX_MAIL_ITEMS)
+                {
+                    toSendItems.emplace_back(itemEntry, itemTemplate->GetMaxStackSize());
+                    itemCount -= itemTemplate->GetMaxStackSize();
+                }
+                else
+                {
+                    allItems.emplace_back(toSendItems);
+                    toSendItems.clear();
+                }
+            }
+
+            toSendItems.emplace_back(itemEntry, itemCount);
+            allItems.emplace_back(toSendItems);
+        };
+
+    for (auto& [itemEntry, itemCount] : mailItems)
+    {
+        AddMailItem(itemEntry, itemCount);
+    }
+
+    CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+
+    MailSender sender(MAIL_CREATURE, MAIL_SENDER_CHROMIE);
+    MailDraft draft(header, body);
+
+    for (auto const& items : allItems)
+    {
+        for (auto const& [itemEntry, itemCount] : items)
+        {
+            if (Item* mailItem = Item::CreateItem(itemEntry, itemCount))
+            {
+                mailItem->SaveToDB(trans);
+                draft.AddItem(mailItem);
+            }
+        }
+    }
+
+    draft.SendMailTo(trans, MailReceiver(player, player->GetGUID().GetCounter()), sender);
+
+    CharacterDatabase.CommitTransaction(trans);
+
+    return true;
 }
 
 void PrestigeHandler::SetItemFlagged(Item* item, bool flag)
