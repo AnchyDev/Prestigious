@@ -13,10 +13,14 @@ INSERT INTO `npc_text` (`ID`, `text0_0`, `text0_1`, `BroadcastTextID0`, `lang0`,
 CREATE TABLE IF NOT EXISTS `prestige_rewards` (
   `entry` int NOT NULL DEFAULT '0',
   `count` int DEFAULT '1',
-  `comment` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '',
+  `scalable` tinyint DEFAULT NULL,
+  `prestige` int DEFAULT NULL,
+  `comment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '',
   PRIMARY KEY (`entry`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 DELETE FROM `prestige_rewards`;
-INSERT INTO `prestige_rewards` (`entry`, `count`, `comment`) VALUES
-	(37742, 200, 'Currency Test Token 2');
+INSERT INTO `prestige_rewards` (`entry`, `count`, `scalable`, `prestige`, `comment`) VALUES
+	(34493, 1, 0, 1, 'Dragon Kite - Count 1 - Don\'t scale with multipliers - Reward at prestige 1'),
+	(37742, 200, 1, 0, 'Currency Test Token 2 - Count 200 - Scale with multipliers - Reward for all prestiges');
+

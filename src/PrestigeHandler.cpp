@@ -265,6 +265,15 @@ void PrestigeHandler::DoPrestige(Player* player, bool sacrificeArmor)
         }
     }
 
+    int32 prestigeLevel = GetPrestigeLevel(player);
+    if (prestigeLevel == -1)
+    {
+        player->SendSystemMessage("An error occured while trying to prestige: Failed to get prestige level. Contact AnchyDev!");
+        return;
+    }
+
+    UpdatePrestigeLevel(player, prestigeLevel + 1);
+
     ResetQuests(player);
     ResetHomebindAndPosition(player);
 
@@ -542,7 +551,7 @@ void PrestigeHandler::ResetActionbar(Player* player)
     auto scheduleDelay = player->GetSession()->GetLatency() * 2;
 
     // Schedule the new actions the future to fix actions being deleted by client
-    scheduler.Schedule(1000ms + std::chrono::milliseconds(scheduleDelay), [this, player, pInfo](TaskContext /*context*/) {
+    scheduler.Schedule(1000ms + std::chrono::milliseconds(scheduleDelay), [player, pInfo](TaskContext /*context*/) {
         if (!player || !pInfo)
         {
             return;
@@ -898,9 +907,20 @@ bool PrestigeHandler::IsHeirloom(Item* item)
 
 void PrestigeHandler::RewardPlayer(Player* player, float multiplier)
 {
+    auto prestigeLevel = GetPrestigeLevel(player);
+
     for (auto reward : rewards)
     {
-        player->SendItemRetrievalMail(reward.Entry, reward.Count * multiplier);
+        // Skip rewards for specific prestige when not eligible.
+        if (reward.PrestigeLevel != 0 &&
+            prestigeLevel != reward.PrestigeLevel)
+        {
+            continue;
+        }
+
+        auto count = reward.Scalable ? reward.Count * multiplier : reward.Count;
+
+        player->AddItem(reward.Entry, count);
 
         LOG_INFO("module", "Adding reward '{}' with count '{}' to player '{}'.", reward.Entry, reward.Count * multiplier, player->GetName());
     }
@@ -1075,6 +1095,98 @@ float PrestigeHandler::GetMultiplierForItemLevel(uint32 itemLevel)
     return multiplier;
 }
 
+void PrestigeHandler::LoadPrestigeLevels()
+{
+    LOG_INFO("module", "Loading prestige levels from 'prestige_tracker' table..");
+
+    auto qResult = CharacterDatabase.Query("SELECT * FROM `prestige_tracker`");
+
+    if (!qResult)
+    {
+        return;
+    }
+
+    prestigeLevels.clear();
+
+    do
+    {
+        auto fields = qResult->Fetch();
+
+        auto guid = fields[0].Get<uint64>();
+        auto level = fields[1].Get<uint32>();
+
+        prestigeLevels.emplace(guid, level);
+    } while (qResult->NextRow());
+
+    LOG_INFO("module", ">> Loaded '{}' prestige levels.", prestigeLevels.size());
+}
+
+void PrestigeHandler::SavePrestigeLevels()
+{
+    LOG_INFO("module", "Saving prestige levels into 'prestige_tracker' table..");
+
+    uint32 count = 0;
+
+    for (auto& [guid, level] : prestigeLevels)
+    {
+        CharacterDatabase.Execute("INSERT INTO prestige_tracker (guid, prestigeLevel) VALUES ({}, {}) ON DUPLICATE KEY UPDATE guid={}, prestigeLevel={}", guid, level, guid, level);
+        count++;
+    }
+
+    LOG_INFO("module", ">> Saved '{}' prestige levels.", count);
+}
+
+int32 PrestigeHandler::GetPrestigeLevel(Player* player)
+{
+    if (!player)
+    {
+        return -1;
+    }
+
+    auto guid = player->GetGUID();
+    if (!guid)
+    {
+        return -1;
+    }
+
+    auto it = prestigeLevels.find(guid.GetRawValue());
+    if (it == prestigeLevels.end())
+    {
+        auto result = prestigeLevels.emplace(guid.GetRawValue(), 0);
+
+        if (!result.second)
+        {
+            return -1;
+        }
+
+        it = result.first;
+    }
+
+    return it->second;
+}
+
+void PrestigeHandler::UpdatePrestigeLevel(Player* player, uint32 level)
+{
+    if (!player)
+    {
+        return;
+    }
+
+    auto guid = player->GetGUID();
+    if (!guid)
+    {
+        return;
+    }
+
+    auto it = prestigeLevels.find(guid.GetRawValue());
+    if (it == prestigeLevels.end())
+    {
+        return;
+    }
+
+    it->second = level;
+}
+
 void PrestigeHandler::LoadRewards()
 {
     LOG_INFO("module", "Loading rewards from 'prestige_rewards' table..");
@@ -1096,6 +1208,8 @@ void PrestigeHandler::LoadRewards()
 
         reward.Entry = fields[0].Get<uint32>();
         reward.Count = fields[1].Get<uint32>();
+        reward.Scalable = fields[2].Get<bool>();
+        reward.PrestigeLevel = fields[3].Get<uint32>();
 
         rewards.push_back(reward);
     } while (qResult->NextRow());

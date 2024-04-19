@@ -8,6 +8,8 @@ struct PrestigeReward
 {
     uint32 Entry;
     uint32 Count;
+    bool Scalable;
+    uint32 PrestigeLevel;
 };
 
 class PrestigeHandler
@@ -61,6 +63,11 @@ public:
 
     float GetMultiplierForItemLevel(uint32 /*itemLevel*/);
 
+    void LoadPrestigeLevels();
+    void SavePrestigeLevels();
+    int32 GetPrestigeLevel(Player* /*player*/);
+    void UpdatePrestigeLevel(Player* /*player*/, uint32 /*level*/);
+
     void LoadRewards();
 
     TaskScheduler* GetScheduler();
@@ -69,6 +76,7 @@ private:
     std::unordered_map<Races, std::unordered_set<uint32>> racialMap;
     std::unordered_map<Classes, std::unordered_set<uint32>> spellMap;
     std::vector<PrestigeReward> rewards;
+    std::unordered_map<uint64, int32> prestigeLevels;
 
     TaskScheduler scheduler;
 };
