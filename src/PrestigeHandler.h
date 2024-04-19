@@ -41,7 +41,8 @@ public:
     void ResetActionbar(Player* /*player*/);
 
     void UnlearnAllSpells(Player* /*player*/);
-    void DesummonMinion(Player* /*players*/);
+    void DesummonMinion(Player* /*player*/);
+    void DesummonPet(Player* /*player*/);
     void LearnRacials(Player* /*player*/);
     void LearnClassSpells(Player* /*player*/);
 

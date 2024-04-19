@@ -1,6 +1,7 @@
 #include "PrestigeHandler.h"
 
 #include "Config.h"
+#include "Pet.h"
 
 PrestigeHandler::PrestigeHandler()
 {
@@ -275,7 +276,6 @@ void PrestigeHandler::DoPrestige(Player* player, bool sacrificeArmor)
     UpdatePrestigeLevel(player, prestigeLevel + 1);
 
     ResetQuests(player);
-    ResetHomebindAndPosition(player);
 
     // There are internal checks inside IterateItems for deleting/flagging items.
     IterateItems(player, sacrificeArmor);
@@ -298,6 +298,7 @@ void PrestigeHandler::DoPrestige(Player* player, bool sacrificeArmor)
 
     UnlearnAllSpells(player);
     DesummonMinion(player);
+    DesummonPet(player);
 
     if (sConfigMgr->GetOption<bool>("Prestigious.ResetActionbar", true))
     {
@@ -310,6 +311,8 @@ void PrestigeHandler::DoPrestige(Player* player, bool sacrificeArmor)
     {
         player->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_UNK31);
     }
+
+    ResetHomebindAndPosition(player);
 
     player->SaveToDB(false, false);
 }
@@ -378,6 +381,17 @@ void PrestigeHandler::DesummonMinion(Player* player)
     }
 
     minion->DespawnOrUnsummon();
+}
+
+void PrestigeHandler::DesummonPet(Player* player)
+{
+    auto pet = player->GetPet();
+    if (!pet)
+    {
+        return;
+    }
+
+    pet->DespawnOrUnsummon();
 }
 
 void PrestigeHandler::LearnRacials(Player* player)
