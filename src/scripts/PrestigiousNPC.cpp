@@ -13,8 +13,8 @@ bool PrestigiousNPCScript::OnGossipHello(Player* player, Creature* creature)
 
     if (!sConfigMgr->GetOption<bool>("Prestigious.Enable", false))
     {
-        SendGossipMenuFor(player, PRESTIGE_TEXT_CANNOT_PRESTIGE, creature);
-        return true;
+        CloseGossipMenuFor(player);
+        return false;
     }
 
     if (sPrestigeHandler->CanPrestige(player))
