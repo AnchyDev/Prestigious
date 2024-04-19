@@ -890,19 +890,9 @@ bool PrestigeHandler::IsHeirloom(Item* item)
 
 void PrestigeHandler::SacrificeRewardPlayer(Player* player, uint32 avgLevel)
 {
-    uint32 rewardCount = 1;
-    uint32 multiplier = 1;
+    float multiplier = GetMultiplierForItemLevel(avgLevel);
 
-    if (avgLevel >= 245)
-    {
-        multiplier = 2;
-    }
-    else if (avgLevel >= 260)
-    {
-        multiplier = 4;
-    }
-
-    rewardCount = rewardCount * multiplier;
+    uint32 rewardCount = 1 * multiplier;
 
     player->SendSystemMessage(Acore::StringFormatFmt("|cffFFFFFFYou were rewarded |cff00FF00{}|cffFFFFFF currency for your average item level of |cff00FF00{}|cffFFFFFF.|r", rewardCount, avgLevel));
     player->AddItem(37711, rewardCount);
@@ -1047,7 +1037,38 @@ void PrestigeHandler::UnflagItems(Player* player)
 
 float PrestigeHandler::GetMultiplierForItemLevel(uint32 itemLevel)
 {
-    return 1.0f;
+    float multiplier = 1.0f;
+
+    if (itemLevel >= 200)
+    {
+        multiplier += sConfigMgr->GetOption<float>("Prestigious.Reward.Multiplier.Bracket.200", 1.0f);
+    }
+    else if (itemLevel >= 216)
+    {
+        multiplier += sConfigMgr->GetOption<float>("Prestigious.Reward.Multiplier.Bracket.216", 2.0f);
+    }
+    else if (itemLevel >= 232)
+    {
+        multiplier += sConfigMgr->GetOption<float>("Prestigious.Reward.Multiplier.Bracket.232", 3.0f);
+    }
+    else if (itemLevel >= 245)
+    {
+        multiplier += sConfigMgr->GetOption<float>("Prestigious.Reward.Multiplier.Bracket.245", 4.0f);
+    }
+    else if (itemLevel >= 251)
+    {
+        multiplier += sConfigMgr->GetOption<float>("Prestigious.Reward.Multiplier.Bracket.251", 5.0f);
+    }
+    else if (itemLevel >= 264)
+    {
+        multiplier += sConfigMgr->GetOption<float>("Prestigious.Reward.Multiplier.Bracket.264", 6.0f);
+    }
+    else if (itemLevel >= 270)
+    {
+        multiplier += sConfigMgr->GetOption<float>("Prestigious.Reward.Multiplier.Bracket.270", 7.0f);
+    }
+
+    return multiplier;
 }
 
 bool PrestigeHandler::UnequipItems(Player* player)

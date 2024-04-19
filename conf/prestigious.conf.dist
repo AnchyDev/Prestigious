@@ -106,3 +106,26 @@ Prestigious.FlagItems = 1
 #
 
 Prestigious.ResetActionbar = 1
+
+#
+#	Prestigious.Reward.Multiplier.Bracket.*
+#		Description: These multipliers are responsible for the reward multiplier when you prestige and sacrifice your armor.
+#		Type:		 Float
+#
+#		Defaults:	
+#		Bracket.200  1
+#		Bracket.216  2
+#		Bracket.232  3
+#		Bracket.245  4
+#		Bracket.251  5
+#		Bracket.264  6
+#		Bracket.270  7
+#
+
+Prestigious.Reward.Multiplier.Bracket.200 = 1
+Prestigious.Reward.Multiplier.Bracket.216 = 2
+Prestigious.Reward.Multiplier.Bracket.232 = 3
+Prestigious.Reward.Multiplier.Bracket.245 = 4
+Prestigious.Reward.Multiplier.Bracket.251 = 5
+Prestigious.Reward.Multiplier.Bracket.264 = 6
+Prestigious.Reward.Multiplier.Bracket.270 = 7
