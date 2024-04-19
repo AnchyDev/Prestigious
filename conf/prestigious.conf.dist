@@ -131,6 +131,16 @@ Prestigious.Reward.Multiplier.Bracket.264 = 6
 Prestigious.Reward.Multiplier.Bracket.270 = 7
 
 #
+#	Prestigious.Reward.Multiplier.DeathKnight
+#		Description: This allows you to control DeathKnight shortcutting.
+#		Note: This multiplier is applied after all other multipliers.
+#		Type:		 Float
+#		Default:     0.33
+#
+
+Prestigious.Reward.Multiplier.DeathKnight = 0.33
+
+#
 #   Prestigious.Reward.Mail.Title
 #        Description: This controls the title for the mail that is received for rewards.
 #
