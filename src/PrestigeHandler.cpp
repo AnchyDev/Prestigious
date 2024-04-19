@@ -982,13 +982,13 @@ bool PrestigeHandler::SendMailItems(Player* player, std::vector<std::pair<uint32
             if (!itemTemplate)
             {
                 LOG_ERROR("entities.player.items", "> PrestigeHandler::SendMailItems: Item id {} is invalid", itemEntry);
-                return false;
+                return;
             }
 
             if (itemCount < 1 || (itemTemplate->MaxCount > 0 && itemCount > static_cast<uint32>(itemTemplate->MaxCount)))
             {
                 LOG_ERROR("entities.player.items", "> PrestigeHandler::SendMailItems: Incorrect item count ({}) for item id {}", itemCount, itemEntry);
-                return false;
+                return;
             }
 
             while (itemCount > itemTemplate->GetMaxStackSize())
