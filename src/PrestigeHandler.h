@@ -52,6 +52,8 @@ public:
     void SetItemFlagged(Item* /*item*/, bool /*flag*/);
     void UnflagItems(Player* /*player*/);
 
+    float GetMultiplierForItemLevel(uint32 /*itemLevel*/);
+
     TaskScheduler* GetScheduler();
 
 private:

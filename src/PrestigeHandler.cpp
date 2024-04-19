@@ -1060,6 +1060,11 @@ void PrestigeHandler::UnflagItems(Player* player)
     LOG_INFO("module", "Prestige> {} player items were unflagged.", unflagged);
 }
 
+float PrestigeHandler::GetMultiplierForItemLevel(uint32 itemLevel)
+{
+    return 1.0f;
+}
+
 bool PrestigeHandler::UnequipItems(Player* player)
 {
     if (!player)
