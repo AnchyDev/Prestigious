@@ -36,7 +36,7 @@ public:
     void LearnRacials(Player* /*player*/);
     void LearnClassSpells(Player* /*player*/);
 
-    uint32 IterateItems(Player* /*player*/, bool /*deleteEquipped*/);
+    void IterateItems(Player* /*player*/, bool /*deleteEquipped*/);
     void EquipDefaultItems(Player* /*player*/);
     bool UnequipItems(Player* /*player*/);
 

@@ -269,10 +269,11 @@ void PrestigeHandler::DoPrestige(Player* player, bool sacrificeArmor)
     ResetHomebindAndPosition(player);
 
     // There are internal checks inside IterateItems for deleting/flagging items.
-    uint32 avgLevel = IterateItems(player, sacrificeArmor);
+    IterateItems(player, sacrificeArmor);
 
     if (sacrificeArmor)
     {
+        uint32 avgLevel = player->GetAverageItemLevel();
         sPrestigeHandler->SacrificeRewardPlayer(player, avgLevel);
     }
 
@@ -556,14 +557,12 @@ void PrestigeHandler::ResetActionbar(Player* player)
     });
 }
 
-uint32 PrestigeHandler::IterateItems(Player* player, bool deleteEquipped)
+void PrestigeHandler::IterateItems(Player* player, bool deleteEquipped)
 {
     LOG_INFO("module", "Prestige> Deleting/flagging player items..");
 
     uint32 flagged = 0;
     uint32 deleted = 0;
-    uint32 avgLevel = 0;
-    uint32 avgCount = 0;
 
     // Equipped items
     if (deleteEquipped ||
@@ -575,16 +574,6 @@ uint32 PrestigeHandler::IterateItems(Player* player, bool deleteEquipped)
             if (!item)
             {
                 continue;
-            }
-
-            if (auto itemProto = item->GetTemplate())
-            {
-                // don't check tabard, ranged, offhand or shirt
-                if (i != EQUIPMENT_SLOT_TABARD && i != EQUIPMENT_SLOT_RANGED && i != EQUIPMENT_SLOT_OFFHAND && i != EQUIPMENT_SLOT_BODY)
-                {
-                    avgLevel += itemProto->GetItemLevelIncludingQuality(player->GetLevel());
-                    avgCount++;
-                }
             }
 
             if (sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
@@ -603,8 +592,6 @@ uint32 PrestigeHandler::IterateItems(Player* player, bool deleteEquipped)
                 deleted++;
             }
         }
-
-        avgLevel = std::max<float>(0.0f, avgLevel / (float)avgCount);
     }
 
     // Default bag items
@@ -785,8 +772,6 @@ uint32 PrestigeHandler::IterateItems(Player* player, bool deleteEquipped)
 
     LOG_INFO("module", "Prestige> {} player items were deleted.", deleted);
     LOG_INFO("module", "Prestige> {} player items were flagged.", flagged);
-
-    return avgLevel;
 }
 
 void PrestigeHandler::EquipDefaultItems(Player* player)
