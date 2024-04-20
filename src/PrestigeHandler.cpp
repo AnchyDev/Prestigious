@@ -317,6 +317,11 @@ void PrestigeHandler::DoPrestige(Player* player, bool sacrificeArmor)
     ResetHomebindAndPosition(player);
 
     player->SaveToDB(false, false);
+
+    if (sConfigMgr->GetOption<bool>("Prestigious.Announcement", true))
+    {
+        sWorld->SendServerMessage(SERVER_MSG_STRING, Acore::StringFormatFmt("|cffFFFFFFPlayer |cff00FF00{} |cffFFFFFFhas prestiged to level |cff00FF00{}|r", player->GetName(), sPrestigeHandler->GetPrestigeLevel(player)));
+    }
 }
 
 void PrestigeHandler::ResetLevel(Player* player)

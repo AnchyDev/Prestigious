@@ -139,3 +139,12 @@ Prestigious.Reward.Mail.Title = "Prestige Reward"
 #
 
 Prestigious.Reward.Mail.Body = "You have been rewarded for prestiging."
+
+#
+#   Prestigious.Announcement
+#        Description: Announces player prestige to the server.
+#                     0 - Disabled
+#        Default:     1 - Enabled
+#
+
+Prestigious.Announcement = 1
