@@ -49,9 +49,13 @@ bool PrestigiousNPCScript::OnGossipSelect(Player* player, Creature* creature, ui
     case PRESTIGE_OPTIONS:
     {
         ClearGossipMenuFor(player);
+
         auto itemLevel = player->GetAverageItemLevel();
-        AddGossipItemFor(player, GOSSIP_ICON_CHAT, "I would like to keep my equipment", GOSSIP_SENDER_MAIN, PRESTIGE_DO_PRESTIGE, "Are you sure you would like to prestige?|n|nThis will reset your level and quest progress.", 0, false);
-        AddGossipItemFor(player, GOSSIP_ICON_CHAT, Acore::StringFormatFmt("I would like to sacrifice my equipment |n|cff170066({} Item Level, {}x Multiplier)", itemLevel, sPrestigeHandler->GetMultiplierForItemLevel(itemLevel)), GOSSIP_SENDER_MAIN, PRESTIGE_DO_PRESTIGE_SACRIFICE, "Are you sure you would like to prestige?|n|nThis will reset your level and progress.|n|n|cffFF0000THIS OPTION WILL DELETE YOUR EQUIPMENT, YOU CANNOT UNDO THIS", 0, false);
+        bool isDeathKnight = player->getClass() == CLASS_DEATH_KNIGHT;
+
+        AddGossipItemFor(player, GOSSIP_ICON_CHAT, Acore::StringFormatFmt("I would like to keep my equipment|n|cff170066({}x Multiplier)|r", sPrestigeHandler->GetBaseMultiplier(isDeathKnight)), GOSSIP_SENDER_MAIN, PRESTIGE_DO_PRESTIGE, "Are you sure you would like to prestige?|n|nThis will reset your level and quest progress.", 0, false);
+        AddGossipItemFor(player, GOSSIP_ICON_CHAT, Acore::StringFormatFmt("I would like to sacrifice my equipment|n|cff170066({} Item Level, {}x Multiplier)|r", itemLevel, sPrestigeHandler->GetMultiplierForItemLevel(itemLevel, isDeathKnight)), GOSSIP_SENDER_MAIN, PRESTIGE_DO_PRESTIGE_SACRIFICE, "Are you sure you would like to prestige?|n|nThis will reset your level and progress.|n|n|cffFF0000THIS OPTION WILL DELETE YOUR EQUIPMENT, YOU CANNOT UNDO THIS", 0, false);
+
         SendGossipMenuFor(player, PRESTIGE_TEXT_OPTIONS, creature);
     }
         break;

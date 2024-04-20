@@ -64,7 +64,7 @@ public:
     void SetItemFlagged(Item* /*item*/, bool /*flag*/);
     void UnflagItems(Player* /*player*/);
 
-    float GetMultiplierForItemLevel(uint32 /*itemLevel*/);
+    float GetMultiplierForItemLevel(uint32 /*itemLevel*/, bool /*isDeathKnight*/);
 
     void LoadPrestigeLevels();
     void SavePrestigeLevels();
@@ -75,6 +75,9 @@ public:
     bool IsWhitelistedQuest(uint32 /*questId*/);
 
     void LoadRewards();
+    void LoadItemLevelBrackets();
+
+    float GetBaseMultiplier(bool /*isDeathKnight*/);
 
     TaskScheduler* GetScheduler();
 
@@ -84,6 +87,7 @@ private:
     std::vector<PrestigeReward> rewards;
     std::unordered_map<uint64, int32> prestigeLevels;
     std::unordered_set<uint32> whitelistQuests;
+    std::map<uint32, float> itemLevelBrackets;
 
     TaskScheduler scheduler;
 };

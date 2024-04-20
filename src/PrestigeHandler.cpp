@@ -289,7 +289,9 @@ void PrestigeHandler::DoPrestige(Player* player, bool sacrificeArmor)
     }
     else
     {
-        RewardPlayer(player, 1.0f);
+        auto multiplier = GetBaseMultiplier(player->getClass() == CLASS_DEATH_KNIGHT);
+
+        RewardPlayer(player, multiplier);
 
         LOG_INFO("module", "Rewarded player '{}' for prestiging.", player->GetName());
     }
@@ -977,7 +979,7 @@ void PrestigeHandler::RewardPlayer(Player* player, float multiplier)
 
 void PrestigeHandler::SacrificeRewardPlayer(Player* player, uint32 avgLevel)
 {
-    float multiplier = GetMultiplierForItemLevel(avgLevel);
+    float multiplier = GetMultiplierForItemLevel(avgLevel, player->getClass() == CLASS_DEATH_KNIGHT);
 
     RewardPlayer(player, multiplier);
 }
@@ -1189,29 +1191,21 @@ void PrestigeHandler::UnflagItems(Player* player)
     LOG_INFO("module", "Prestige> {} player items were unflagged.", unflagged);
 }
 
-float PrestigeHandler::GetMultiplierForItemLevel(uint32 itemLevel)
+float PrestigeHandler::GetMultiplierForItemLevel(uint32 itemLevel, bool isDeathKnight)
 {
+    float baseMultiplier = GetBaseMultiplier(isDeathKnight);
+
     float multiplier = 1.0f;
 
-    std::map<uint32, float> brackets = {
-        {200, 1.0f},
-        {216, 2.0f},
-        {232, 3.0f},
-        {245, 4.0f},
-        {251, 5.0f},
-        {264, 6.0f},
-        {270, 7.0f}
-    };
-
-    for (const auto& [bracket, value] : brackets)
+    for (const auto& [bracket, bracketMultiplier] : itemLevelBrackets)
     {
         if (itemLevel >= bracket)
         {
-            multiplier = sConfigMgr->GetOption<float>("Prestigious.Reward.Multiplier.Bracket." + std::to_string(bracket), value);
+            multiplier = bracketMultiplier;
         }
     }
 
-    return multiplier;
+    return baseMultiplier * multiplier;
 }
 
 void PrestigeHandler::LoadPrestigeLevels()
@@ -1362,6 +1356,39 @@ void PrestigeHandler::LoadRewards()
     } while (qResult->NextRow());
 
     LOG_INFO("module", ">> Loaded '{}' item levels.", rewards.size());
+}
+
+void PrestigeHandler::LoadItemLevelBrackets()
+{
+    LOG_INFO("module", "Loading itemlevel brackets from 'prestige_sacrifice_brackets' table..");
+
+    auto qResult = WorldDatabase.Query("SELECT * FROM `prestige_sacrifice_brackets` ORDER BY itemlevel ASC");
+
+    if (!qResult)
+    {
+        return;
+    }
+
+    itemLevelBrackets.clear();
+
+    do
+    {
+        auto fields = qResult->Fetch();
+
+        uint32 itemLevel = fields[0].Get<uint32>();
+        uint32 multiplier = fields[1].Get<float>();
+
+        itemLevelBrackets.emplace(itemLevel, multiplier);
+    } while (qResult->NextRow());
+
+    LOG_INFO("module", ">> Loaded '{}' item level brackets.", itemLevelBrackets.size());
+}
+
+float PrestigeHandler::GetBaseMultiplier(bool isDeathKnight)
+{
+    return isDeathKnight ?
+        sConfigMgr->GetOption<float>("Prestigious.Reward.Multiplier.Base.DeathKnight", 0.5f) :
+        sConfigMgr->GetOption<float>("Prestigious.Reward.Multiplier.Base", 1.0f);
 }
 
 bool PrestigeHandler::UnequipItems(Player* player)

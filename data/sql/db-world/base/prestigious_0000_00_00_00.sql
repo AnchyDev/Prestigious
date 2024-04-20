@@ -43,3 +43,20 @@ INSERT INTO `prestige_whitelist_quest` (`quest_id`, `comment`) VALUES
 	(24757, 'Shadowmourne - 6 - Frost Infusion'),
 	(24912, 'Shadowmourne - 8 - Empowerment');
 
+CREATE TABLE IF NOT EXISTS `prestige_sacrifice_brackets` (
+  `itemlevel` int NOT NULL,
+  `multiplier` float DEFAULT NULL,
+  PRIMARY KEY (`itemlevel`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+DELETE FROM `prestige_sacrifice_brackets`;
+INSERT INTO `prestige_sacrifice_brackets` (`itemlevel`, `multiplier`) VALUES
+	(200, 1),
+	(216, 2),
+	(232, 3),
+	(245, 4),
+	(251, 5),
+	(264, 6),
+	(268, 7),
+	(270, 8);
+

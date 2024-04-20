@@ -28,6 +28,7 @@ void PrestigiousWorldScript::OnAfterConfigLoad(bool reload)
     sPrestigeHandler->LoadRewards();
     sPrestigeHandler->LoadPrestigeLevels();
     sPrestigeHandler->LoadWhitelistedQuests();
+    sPrestigeHandler->LoadItemLevelBrackets();
 }
 
 void PrestigiousWorldScript::OnShutdownInitiate(ShutdownExitCode /*code*/, ShutdownMask /*mask*/)

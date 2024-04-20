@@ -108,37 +108,23 @@ Prestigious.FlagItems = 1
 Prestigious.ResetActionbar = 1
 
 #
-#	Prestigious.Reward.Multiplier.Bracket.*
-#		Description: These multipliers are responsible for the reward multiplier when you prestige and sacrifice your armor.
+#	Prestigious.Reward.Multiplier.Base
+#		Description: This is the base multiplier which is multiplied by the database multipliers.
 #		Type:		 Float
-#
-#		Defaults:	
-#		Bracket.200  1
-#		Bracket.216  2
-#		Bracket.232  3
-#		Bracket.245  4
-#		Bracket.251  5
-#		Bracket.264  6
-#		Bracket.270  7
+#		Default:     1
 #
 
-Prestigious.Reward.Multiplier.Bracket.200 = 1
-Prestigious.Reward.Multiplier.Bracket.216 = 2
-Prestigious.Reward.Multiplier.Bracket.232 = 3
-Prestigious.Reward.Multiplier.Bracket.245 = 4
-Prestigious.Reward.Multiplier.Bracket.251 = 5
-Prestigious.Reward.Multiplier.Bracket.264 = 6
-Prestigious.Reward.Multiplier.Bracket.270 = 7
+Prestigious.Reward.Multiplier.Base = 1
 
 #
-#	Prestigious.Reward.Multiplier.DeathKnight
+#	Prestigious.Reward.Multiplier.Base.DeathKnight
 #		Description: This allows you to control DeathKnight shortcutting.
-#		Note: This multiplier is applied after all other multipliers.
+#		Note: This is a separate base multiplier for deathknights.
 #		Type:		 Float
-#		Default:     0.33
+#		Default:     0.5
 #
 
-Prestigious.Reward.Multiplier.DeathKnight = 0.33
+Prestigious.Reward.Multiplier.Base.DeathKnight = 0.5
 
 #
 #   Prestigious.Reward.Mail.Title
