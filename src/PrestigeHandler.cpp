@@ -956,7 +956,7 @@ void PrestigeHandler::RewardPlayer(Player* player, float multiplier)
             continue;
         }
 
-        auto count = reward.Scalable ? reward.Count * multiplier : reward.Count;
+        uint32 count = reward.Scalable ? std::ceil(float(reward.Count) * multiplier) : reward.Count;
 
         mailItems.push_back(std::pair(reward.Entry, count));
 
