@@ -1,7 +1,7 @@
 # Prestigious
 This module allows you to prestige, resetting your level back to 1 and resetting quest progress.
 
-> [!IMPORTANT]
+> [!CAUTION]
 > This module is a work in progress and a bit quirky. Use at your own risk.
 
 ## Setup
