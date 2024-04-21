@@ -26,60 +26,6 @@ Prestigious.Enable = 0
 Prestigious.Debug = 0
 
 #
-#   Prestigious.Delete.Inventory
-#        Description: Deletes inventory items when prestiging.
-#        Default:     0 - Disabled
-#                     1 - Enabled
-#
-
-Prestigious.Delete.Inventory = 0
-
-#
-#   Prestigious.Delete.Inventory.Bags
-#        Description: Deletes inventory bag items when prestiging.
-#        Default:     0 - Disabled
-#                     1 - Enabled
-#
-
-Prestigious.Delete.Inventory.Bags = 0
-
-#
-#   Prestigious.Delete.BuyBack
-#        Description: Deletes items from the vendor buyback tab when prestiging.
-#        Default:     0 - Disabled
-#                     1 - Enabled
-#
-
-Prestigious.Delete.BuyBack = 0
-
-#
-#   Prestigious.Delete.KeyRing
-#        Description: Deletes items from the key ring when prestiging.
-#        Default:     0 - Disabled
-#                     1 - Enabled
-#
-
-Prestigious.Delete.KeyRing = 0
-
-#
-#   Prestigious.Delete.Bank
-#        Description: Deletes items from the bank when prestiging.
-#        Default:     0 - Disabled
-#                     1 - Enabled
-#
-
-Prestigious.Delete.Bank = 0
-
-#
-#   Prestigious.Delete.Bank.Bags
-#        Description: Deletes items from the bank bags when prestiging.
-#        Default:     0 - Disabled
-#                     1 - Enabled
-#
-
-Prestigious.Delete.Bank.Bags = 0
-
-#
 #   Prestigious.Unlearn.Professions
 #        Description: Unlearns profession spells when prestiging.
 #                     0 - Disabled
@@ -89,14 +35,13 @@ Prestigious.Delete.Bank.Bags = 0
 Prestigious.Unlearn.Professions = 1
 
 #
-#   Prestigious.Unequip.Equipped
-#        Description: Unequip any equipped items and mail them to the player.
-#                     0 - Disabled
-#        Default:     1 - Enabled
+#   Prestigious.Unlearn.Mounts
+#        Description: Unlearns mounts when prestiging.
+#        Default:     0 - Disabled
+#                     1 - Enabled
 #
 
-Prestigious.Unequip.Equipped = 1
-
+Prestigious.Unlearn.Mounts = 0
 
 #
 #   Prestigious.FlagItems
@@ -117,22 +62,13 @@ Prestigious.FlagItems = 1
 Prestigious.ResetActionbar = 1
 
 #
-#   Prestigious.ResetSkills.Weapons
-#        Description: Resets the players weapon skills when prestiging.
+#   Prestigious.ResetSkills
+#        Description: Resets the players skills to 1 when prestiging.
 #                     0 - Disabled
 #        Default:     1 - Enabled
 #
 
-Prestigious.ResetSkills.Weapons = 1
-
-#
-#   Prestigious.ResetSkills.Defense
-#        Description: Resets the players defense skills when prestiging.
-#                     0 - Disabled
-#        Default:     1 - Enabled
-#
-
-Prestigious.ResetSkills.Defense = 1
+Prestigious.ResetSkills = 1
 
 #
 #	Prestigious.Reward.Multiplier.Base

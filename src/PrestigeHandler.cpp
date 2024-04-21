@@ -251,79 +251,16 @@ void PrestigeHandler::DoPrestige(Player* player, bool sacrificeArmor)
         !player->GetGUID() ||
         !player->GetSession())
     {
-        LOG_ERROR("module", "Failed to get player session during prestige process.");
         return;
     }
 
-    if (!sacrificeArmor)
-    {
-        bool result = UnequipItems(player);
+    PrestigeState state;
+    state.IsSacrifice = sacrificeArmor;
+    state.AvgItemLevel = 0;
+    state.Message = "";
+    state.QueueState = QueueState::QUEUE_RESET_INIT;
 
-        if (!result)
-        {
-            player->SendSystemMessage("Failed to prestige, there was no space in your inventory to store your equipment.");
-            return;
-        }
-    }
-
-    int32 prestigeLevel = GetPrestigeLevel(player);
-    if (prestigeLevel == -1)
-    {
-        player->SendSystemMessage("An error occured while trying to prestige: Failed to get prestige level. Contact an Administrator!");
-        return;
-    }
-
-    UpdatePrestigeLevel(player, prestigeLevel + 1);
-
-    ResetQuests(player);
-
-    uint32 avgLevel = player->GetAverageItemLevel();
-
-    // There are internal checks inside IterateItems for deleting/flagging items.
-    IterateItems(player, sacrificeArmor);
-
-    if (sacrificeArmor)
-    {
-        SacrificeRewardPlayer(player, avgLevel);
-
-        if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
-        {
-            LOG_INFO("module", "Rewarded player '{}' for sacrificing gear during prestige.", player->GetName());
-        }
-    }
-    else
-    {
-        auto multiplier = GetBaseMultiplier(player->getClass() == CLASS_DEATH_KNIGHT);
-
-        RewardPlayer(player, multiplier);
-
-        if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
-        {
-            LOG_INFO("module", "Rewarded player '{}' for prestiging.", player->GetName());
-        }
-    }
-
-    UnlearnAllSpells(player);
-    ResetSkills(player);
-
-    DesummonMinion(player);
-    DesummonPet(player);
-
-    if (sConfigMgr->GetOption<bool>("Prestigious.ResetActionbar", true))
-    {
-        ResetActionbar(player);
-    }
-
-    QueuePrestige(player, QueueReason::QUEUE_RESET_LEVEL);
-
-    if (sConfigMgr->GetOption<bool>("Prestigious.Announcement", true))
-    {
-        std::string message = sacrificeArmor ?
-            Acore::StringFormatFmt("|cffFFFFFFPlayer |cff00FF00{} |cffFFFFFFhas |cffFF0000sacrificed|cffFFFFFF their item level |cff00FF00{}|cffFFFFFF equipment, |cffFFFFFFprestiging to prestige level |cff00FF00{}!|r", player->GetName(), avgLevel, sPrestigeHandler->GetPrestigeLevel(player))  :
-            Acore::StringFormatFmt("|cffFFFFFFPlayer |cff00FF00{} |cffFFFFFFhas prestiged to prestige level |cff00FF00{}!|r", player->GetName(), sPrestigeHandler->GetPrestigeLevel(player));
-
-        sWorld->SendServerMessage(SERVER_MSG_STRING, message);
-    }
+    AddPrestigeState(player, state);
 }
 
 void PrestigeHandler::ResetLevel(Player* player)
@@ -345,7 +282,7 @@ void PrestigeHandler::ResetLevel(Player* player)
     }
 }
 
-void PrestigeHandler::UnlearnAllSpells(Player* player)
+void PrestigeHandler::ResetSpells(Player* player)
 {
     if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
     {
@@ -379,6 +316,15 @@ void PrestigeHandler::UnlearnAllSpells(Player* player)
             }
         }
 
+        // Don't unlearn mounts
+        if (!sConfigMgr->GetOption<bool>("Prestigious.Unlearn.Mounts", false))
+        {
+            if (IsMount(spellId))
+            {
+                continue;
+            }
+        }
+
         player->removeSpell(spellId, SPEC_MASK_ALL, false);
     }
 
@@ -390,35 +336,46 @@ void PrestigeHandler::UnlearnAllSpells(Player* player)
 
 void PrestigeHandler::ResetSkills(Player* player)
 {
-    auto maxSkillLevel = player->GetMaxSkillValueForLevel();
-
-    if (sConfigMgr->GetOption<bool>("Prestigious.ResetSkills.Weapons", true))
+    if (!sConfigMgr->GetOption<bool>("Prestigious.ResetSkills", true))
     {
-        player->SetSkill(SKILL_UNARMED, 1, 1, maxSkillLevel);
-
-        player->SetSkill(SKILL_2H_MACES, 1, 1, maxSkillLevel);
-        player->SetSkill(SKILL_2H_AXES, 1, 1, maxSkillLevel);
-        player->SetSkill(SKILL_2H_SWORDS, 1, 1, maxSkillLevel);
-
-        player->SetSkill(SKILL_MACES, 1, 1, maxSkillLevel);
-        player->SetSkill(SKILL_AXES, 1, 1, maxSkillLevel);
-        player->SetSkill(SKILL_SWORDS, 1, 1, maxSkillLevel);
-        player->SetSkill(SKILL_DAGGERS, 1, 1, maxSkillLevel);
-        player->SetSkill(SKILL_FIST_WEAPONS, 1, 1, maxSkillLevel);
-
-        player->SetSkill(SKILL_STAVES, 1, 1, maxSkillLevel);
-        player->SetSkill(SKILL_POLEARMS, 1, 1, maxSkillLevel);
-
-        player->SetSkill(SKILL_GUNS, 1, 1, maxSkillLevel);
-        player->SetSkill(SKILL_BOWS, 1, 1, maxSkillLevel);
-        player->SetSkill(SKILL_CROSSBOWS, 1, 1, maxSkillLevel);
-        player->SetSkill(SKILL_WANDS, 1, 1, maxSkillLevel);
-        player->SetSkill(SKILL_THROWN, 1, 1, maxSkillLevel);
+        return;
     }
 
-    if (sConfigMgr->GetOption<bool>("Prestigious.ResetSkills.Defense", true))
+    auto maxSkillLevel = player->GetMaxSkillValueForLevel();
+    std::vector<uint32> skills
     {
-        player->SetSkill(SKILL_DEFENSE, 1, 1, maxSkillLevel);
+        SKILL_UNARMED,
+
+        SKILL_2H_MACES,
+        SKILL_2H_AXES,
+        SKILL_2H_SWORDS,
+
+        SKILL_MACES,
+        SKILL_AXES,
+        SKILL_SWORDS,
+        SKILL_DAGGERS,
+        SKILL_FIST_WEAPONS,
+
+        SKILL_STAVES,
+        SKILL_POLEARMS,
+
+        SKILL_GUNS,
+        SKILL_BOWS,
+        SKILL_CROSSBOWS,
+        SKILL_WANDS,
+        SKILL_THROWN,
+
+        SKILL_DEFENSE
+    };
+
+    for (auto& skill : skills)
+    {
+        if (!player->HasSkill(skill))
+        {
+            continue;
+        }
+
+        player->SetSkill(skill, 1, 1, player->GetMaxSkillValueForLevel());
     }
 }
 
@@ -447,91 +404,6 @@ void PrestigeHandler::DesummonPet(Player* player)
     }
 
     pet->DespawnOrUnsummon();
-}
-
-void PrestigeHandler::LearnRacials(Player* player)
-{
-    if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
-    {
-        LOG_INFO("module", "Prestige> Learning player racials..");
-    }
-
-    auto it = racialMap.find(static_cast<Races>(player->getRace()));
-    if (it == racialMap.end())
-    {
-        LOG_WARN("module", "Failed to find racials for player {} race {}.", player->GetName(), player->getRace());
-        return;
-    }
-
-    auto racials = it->second;
-
-    for (auto racial : racials)
-    {
-        if (!racial ||
-            player->HasSpell(racial))
-        {
-            continue;
-        }
-
-        player->learnSpell(racial);
-    }
-
-    if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
-    {
-        LOG_INFO("module", "Prestige> Player racial spells learned.");
-    }
-}
-
-void PrestigeHandler::LearnClassSpells(Player* player)
-{
-    if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
-    {
-        LOG_INFO("module", "Prestige> Learning player class spells..");
-    }
-
-    auto it = spellMap.find(static_cast<Classes>(player->getClass()));
-    if (it == spellMap.end())
-    {
-        LOG_WARN("module", "Failed to find spells for player {} class {}.", player->GetName(), player->getClass());
-        return;
-    }
-
-    auto spells = it->second;
-
-    for (auto spell : spells)
-    {
-        if (!spell ||
-            player->HasSpell(spell))
-        {
-            continue;
-        }
-
-        player->learnSpell(spell);
-    }
-
-    auto playerInfo = sObjectMgr->GetPlayerInfo(player->getRace(), player->getClass());
-    if (!playerInfo)
-    {
-        LOG_WARN("module", "Prestige> Failed to load player information for player {}.", player->GetName());
-        return;
-    }
-
-    // Re-cast spells like blood presence / battle stance
-    for (auto& castSpell : playerInfo->castSpells)
-    {
-        // Dont try to cast a spell the player does not have
-        if (!player->HasSpell(castSpell))
-        {
-            continue;
-        }
-
-        player->CastSpell(player, castSpell, true);
-    }
-
-    if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
-    {
-        LOG_INFO("module", "Prestige> Player class spells learned.");
-    }
 }
 
 void PrestigeHandler::ResetQuests(Player* player)
@@ -628,11 +500,6 @@ void PrestigeHandler::ResetHomebindAndPosition(Player* player)
 
 void PrestigeHandler::ResetActionbar(Player* player)
 {
-    if (!player)
-    {
-        return;
-    }
-
     PlayerInfo const* pInfo = sObjectMgr->GetPlayerInfo(player->getRace(), player->getClass());
 
     if (!pInfo)
@@ -711,8 +578,7 @@ void PrestigeHandler::IterateItems(Player* player, bool deleteEquipped)
     }
 
     // Default bag items
-    if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Inventory", false) ||
-        sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
+    if (sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
     {
         for (uint32 i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
         {
@@ -727,18 +593,11 @@ void PrestigeHandler::IterateItems(Player* player, bool deleteEquipped)
                 SetItemFlagged(item, true);
                 flagged++;
             }
-
-            if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Inventory", false))
-            {
-                player->DestroyItem(INVENTORY_SLOT_BAG_0, i, true);
-                deleted++;
-            }
         }
     }
 
     // Additional bags
-    if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Inventory.Bags", false) ||
-        sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
+    if (sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
     {
         for (uint32 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
         {
@@ -762,19 +621,12 @@ void PrestigeHandler::IterateItems(Player* player, bool deleteEquipped)
                     SetItemFlagged(item, true);
                     flagged++;
                 }
-
-                if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Inventory.Bags", false))
-                {
-                    player->DestroyItem(i, j, true);
-                    deleted++;
-                }
             }
         }
     }
 
     // Items from the buyback tab
-    if (sConfigMgr->GetOption<bool>("Prestigious.Delete.BuyBack", false) ||
-        sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
+    if (sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
     {
         for (uint32 i = BUYBACK_SLOT_START; i < BUYBACK_SLOT_END; ++i)
         {
@@ -789,18 +641,11 @@ void PrestigeHandler::IterateItems(Player* player, bool deleteEquipped)
                 SetItemFlagged(item, true);
                 flagged++;
             }
-
-            if (sConfigMgr->GetOption<bool>("Prestigious.Delete.BuyBack", false))
-            {
-                player->RemoveItemFromBuyBackSlot(i, true);
-                deleted++;
-            }
         }
     }
 
     // Items from the keyring
-    if (sConfigMgr->GetOption<bool>("Prestigious.Delete.KeyRing", false) ||
-        sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
+    if (sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
     {
         for (uint32 i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; ++i)
         {
@@ -815,18 +660,11 @@ void PrestigeHandler::IterateItems(Player* player, bool deleteEquipped)
                 SetItemFlagged(item, true);
                 flagged++;
             }
-
-            if (sConfigMgr->GetOption<bool>("Prestigious.Delete.KeyRing", false))
-            {
-                player->DestroyItem(INVENTORY_SLOT_BAG_0, i, true);
-                deleted++;
-            }
         }
     }
 
     // Items from the main bank slots
-    if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Bank", false) ||
-        sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
+    if (sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
     {
         for (uint32 i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; ++i)
         {
@@ -841,18 +679,11 @@ void PrestigeHandler::IterateItems(Player* player, bool deleteEquipped)
                 SetItemFlagged(item, true);
                 flagged++;
             }
-
-            if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Bank", false))
-            {
-                player->DestroyItem(INVENTORY_SLOT_BAG_0, i, true);
-                deleted++;
-            }
         }
     }
 
     // Items from the additional bank bag slots
-    if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Bank.Bags", false) ||
-        sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
+    if (sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
     {
         for (uint32 i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; ++i)
         {
@@ -876,12 +707,6 @@ void PrestigeHandler::IterateItems(Player* player, bool deleteEquipped)
                     SetItemFlagged(item, true);
                     flagged++;
                 }
-
-                if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Bank.Bags", false))
-                {
-                    player->DestroyItem(i, j, true);
-                    deleted++;
-                }
             }
         }
     }
@@ -895,6 +720,11 @@ void PrestigeHandler::IterateItems(Player* player, bool deleteEquipped)
 
 void PrestigeHandler::EquipDefaultItems(Player* player)
 {
+    if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
+    {
+        LOG_INFO("module", "Pretige> Equipping defaults items..");
+    }
+
     auto startOutfit = GetCharStartOutfitEntry(player->getRace(), player->getClass(), player->getGender());
 
     for (uint8 i = 0; i < MAX_OUTFIT_ITEMS; ++i)
@@ -917,6 +747,11 @@ void PrestigeHandler::EquipDefaultItems(Player* player)
         }
 
         player->StoreNewItemInBestSlots(itemEntry, 1);
+    }
+
+    if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
+    {
+        LOG_INFO("module", "Pretige> Default items were equipped.");
     }
 }
 
@@ -1005,6 +840,23 @@ bool PrestigeHandler::IsHeirloom(Item* item)
     }
 
     return itemProto->Quality == ITEM_QUALITY_HEIRLOOM;
+}
+
+bool PrestigeHandler::IsMount(uint32 spellId)
+{
+    auto spellInfo = sSpellMgr->GetSpellInfo(spellId);
+    if (!spellInfo)
+    {
+        return false;
+    }
+
+    auto effect = spellInfo->Effects[0];
+    if (effect.ApplyAuraName != SPELL_AURA_MOUNTED)
+    {
+        return false;
+    }
+
+    return true;
 }
 
 bool PrestigeHandler::HasItemsEquipped(Player* player)
@@ -1500,7 +1352,7 @@ float PrestigeHandler::GetBaseMultiplier(bool isDeathKnight)
         sConfigMgr->GetOption<float>("Prestigious.Reward.Multiplier.Base", 1.0f);
 }
 
-void PrestigeHandler::QueuePrestige(Player* player, QueueReason reason)
+void PrestigeHandler::AddPrestigeState(Player* player, PrestigeState state)
 {
     if (!player)
     {
@@ -1510,11 +1362,26 @@ void PrestigeHandler::QueuePrestige(Player* player, QueueReason reason)
     auto it = prestigeQueue.find(player);
     if (it != prestigeQueue.end())
     {
-        it->second = reason;
         return;
     }
 
-    prestigeQueue.emplace(player, reason);
+    prestigeQueue.emplace(player, state);
+}
+
+void PrestigeHandler::UpdateQueueState(Player* player, QueueState state)
+{
+    if (!player)
+    {
+        return;
+    }
+
+    auto it = prestigeQueue.find(player);
+    if (it == prestigeQueue.end())
+    {
+        return;
+    }
+
+    it->second.QueueState = state;
 }
 
 void PrestigeHandler::DequeuePrestige(Player* player)
@@ -1542,67 +1409,226 @@ void PrestigeHandler::HandleQueue()
 
     std::vector<Player*> playersToDequeue;
 
-    for (auto item : prestigeQueue)
+    for (auto& item : prestigeQueue)
     {
         Player* player = item.first;
-        QueueReason reason = item.second;
+        PrestigeState* state = &item.second;
 
         if (!player)
         {
             continue;
         }
 
-        switch (reason)
+        switch (state->QueueState)
         {
-        case QueueReason::QUEUE_RESET_LEVEL:
-            if (HasItemsEquipped(player))
-            {
-                return;
-            }
-
-            ResetLevel(player);
-
-            QueuePrestige(player, QueueReason::QUEUE_EQUIP_NEW_ITEMS);
+        case QueueState::QUEUE_RESET_INIT:
+            QueueResetInit(player);
             break;
 
-        case QueueReason::QUEUE_EQUIP_NEW_ITEMS:
-            EquipDefaultItems(player);
-
-            QueuePrestige(player, QueueReason::QUEUE_TELEPORT_PLAYER);
+        case QueueState::QUEUE_RESET_EQUIPMENT:
+            QueueResetEquipment(player, state);
             break;
 
-        case QueueReason::QUEUE_TELEPORT_PLAYER:
-            if (!HasItemsEquipped(player))
-            {
-                return;
-            }
-
-            ResetHomebindAndPosition(player);
-
-            QueuePrestige(player, QueueReason::QUEUE_DONE);
+        case QueueState::QUEUE_RESET_LEVEL:
+            QueueResetLevel(player);
             break;
 
-        case QueueReason::QUEUE_DONE:
-            player->SaveToDB(false, false);
+        case QueueState::QUEUE_RESET_EQUIP_NEW_ITEMS:
+            QueueResetNewEquipment(player);
+            break;
+
+        case QueueState::QUEUE_RESET_TELEPORT:
+            QueueResetHomebindAndPosition(player);
+            break;
+
+        case QueueState::QUEUE_RESET_SPELLS:
+            QueueResetSpells(player);
+            break;
+
+        case QueueState::QUEUE_RESET_SKILLS:
+            QueueResetSkills(player);
+            break;
+
+        case QueueState::QUEUE_RESET_ACTIONS:
+            QueueResetActions(player);
+            break;
+
+        case QueueState::QUEUE_RESET_ACTIONBAR:
+            QueueResetActionBar(player);
+            break;
+
+        case QueueState::QUEUE_RESET_QUESTS:
+            QueueResetQuests(player);
+            break;
+
+        case QueueState::QUEUE_RESET_DESUMMON_PETS:
+            QueueResetDesummonPets(player);
+            break;
+
+        case QueueState::QUEUE_RESET_COMPLETE:
+            QueueResetComplete(player, state);
+            playersToDequeue.push_back(player);
+            break;
+
+        case QueueState::QUEUE_RESET_FAILED:
+            player->SendSystemMessage(state->Message);
             playersToDequeue.push_back(player);
             break;
         }
     }
 
-    // Clean completed players
+    // Clean completed/failed players
     for(auto player : playersToDequeue)
     {
         DequeuePrestige(player);
     }
 }
 
-bool PrestigeHandler::UnequipItems(Player* player)
+void PrestigeHandler::QueueResetInit(Player* player)
 {
-    if (!player)
+    int32 prestigeLevel = GetPrestigeLevel(player);
+    if (prestigeLevel == -1)
     {
-        return false;
+        player->SendSystemMessage("An error occured while trying to prestige: Failed to get prestige level. Contact an Administrator!");
+        LOG_ERROR("module", "Failed to get prestige level for player '{}'.", player->GetName());
+        return;
     }
 
+    UpdatePrestigeLevel(player, prestigeLevel + 1);
+
+    UpdateQueueState(player, QueueState::QUEUE_RESET_EQUIPMENT);
+}
+
+void PrestigeHandler::QueueResetEquipment(Player* player, PrestigeState* state)
+{
+    state->AvgItemLevel = player->GetAverageItemLevel();
+
+    if (!state->IsSacrifice)
+    {
+        bool result = UnequipItems(player);
+
+        if (!result)
+        {
+            state->Message = "Failed to prestige, there was no space in your inventory to store your equipment.";
+            state->QueueState = QueueState::QUEUE_RESET_FAILED;
+            return;
+        }
+    }
+
+    // Flag / Delete Items.
+    IterateItems(player, state->IsSacrifice);
+
+    UpdateQueueState(player, QueueState::QUEUE_RESET_LEVEL);
+}
+
+void PrestigeHandler::QueueResetLevel(Player* player)
+{
+    // Ensure items were deleted / unequipped before continue
+    if (HasItemsEquipped(player))
+    {
+        return;
+    }
+
+    ResetLevel(player);
+
+    UpdateQueueState(player, QueueState::QUEUE_RESET_EQUIP_NEW_ITEMS);
+}
+
+void PrestigeHandler::QueueResetNewEquipment(Player* player)
+{
+    auto level = player->GetLevel();
+
+    // Ensure the level reset
+    if (level != 1 &&
+        level != 55)
+    {
+        return;
+    }
+
+    EquipDefaultItems(player);
+
+    UpdateQueueState(player, QueueState::QUEUE_RESET_TELEPORT);
+}
+
+void PrestigeHandler::QueueResetHomebindAndPosition(Player* player)
+{
+    // Wait for default items to be equipped first
+    if (!HasItemsEquipped(player))
+    {
+        return;
+    }
+
+    ResetHomebindAndPosition(player);
+
+    UpdateQueueState(player, QueueState::QUEUE_RESET_SPELLS);
+}
+
+void PrestigeHandler::QueueResetSpells(Player* player)
+{
+    // Wait for relocation
+    if (player->IsBeingTeleported() ||
+        !player->IsInWorld())
+    {
+        return;
+    }
+
+    ResetSpells(player);
+
+    UpdateQueueState(player, QueueState::QUEUE_RESET_SKILLS);
+}
+
+void PrestigeHandler::QueueResetSkills(Player* player)
+{
+    ResetSkills(player);
+
+    UpdateQueueState(player, QueueState::QUEUE_RESET_ACTIONS);
+}
+
+void PrestigeHandler::QueueResetActions(Player* player)
+{
+    CharacterDatabase.Execute("DELETE FROM character_action WHERE guid = {}", player->GetGUID().GetCounter());
+
+    UpdateQueueState(player, QueueState::QUEUE_RESET_ACTIONBAR);
+}
+
+void PrestigeHandler::QueueResetActionBar(Player* player)
+{
+    ResetActionbar(player);
+
+    UpdateQueueState(player, QueueState::QUEUE_RESET_QUESTS);
+}
+
+void PrestigeHandler::QueueResetQuests(Player* player)
+{
+    ResetQuests(player);
+
+    UpdateQueueState(player, QueueState::QUEUE_RESET_DESUMMON_PETS);
+}
+
+void PrestigeHandler::QueueResetDesummonPets(Player* player)
+{
+    DesummonMinion(player);
+    DesummonPet(player);
+
+    UpdateQueueState(player, QueueState::QUEUE_RESET_COMPLETE);
+}
+
+void PrestigeHandler::QueueResetComplete(Player* player, PrestigeState* state)
+{
+    player->SaveToDB(false, false);
+    
+    if (sConfigMgr->GetOption<bool>("Prestigious.Announcement", true))
+    {
+        std::string message = state->IsSacrifice ?
+            Acore::StringFormatFmt("|cffFFFFFFPlayer |cff00FF00{} |cffFFFFFFhas |cffFF0000sacrificed|cffFFFFFF their item level |cff00FF00{}|cffFFFFFF equipment, |cffFFFFFFprestiging to prestige level |cff00FF00{}!|r", player->GetName(), state->AvgItemLevel, sPrestigeHandler->GetPrestigeLevel(player)) :
+            Acore::StringFormatFmt("|cffFFFFFFPlayer |cff00FF00{} |cffFFFFFFhas prestiged to prestige level |cff00FF00{}!|r", player->GetName(), sPrestigeHandler->GetPrestigeLevel(player));
+
+        sWorld->SendServerMessage(SERVER_MSG_STRING, message);
+    }
+}
+
+bool PrestigeHandler::UnequipItems(Player* player)
+{
     for (uint32 i = 0; i < INVENTORY_SLOT_BAG_START; ++i)
     {
         auto item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, i);

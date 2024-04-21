@@ -33,12 +33,29 @@ public:
         SPELL_AURA_BANISH = 44836, // Banish used to lock player
     };
 
-    enum QueueReason
+    enum QueueState
     {
-        QUEUE_RESET_LEVEL = 0,
-        QUEUE_EQUIP_NEW_ITEMS = 1,
-        QUEUE_TELEPORT_PLAYER = 2,
-        QUEUE_DONE = 3,
+        QUEUE_RESET_INIT,
+        QUEUE_RESET_EQUIPMENT,
+        QUEUE_RESET_LEVEL,
+        QUEUE_RESET_EQUIP_NEW_ITEMS,
+        QUEUE_RESET_TELEPORT,
+        QUEUE_RESET_SPELLS,
+        QUEUE_RESET_SKILLS,
+        QUEUE_RESET_ACTIONS,
+        QUEUE_RESET_ACTIONBAR,
+        QUEUE_RESET_QUESTS,
+        QUEUE_RESET_DESUMMON_PETS,
+        QUEUE_RESET_COMPLETE,
+        QUEUE_RESET_FAILED,
+    };
+
+    struct PrestigeState
+    {
+        QueueState QueueState;
+        bool IsSacrifice;
+        uint32 AvgItemLevel;
+        std::string Message;
     };
 
     bool CanPrestige(Player* /*player*/);
@@ -49,12 +66,10 @@ public:
     void ResetHomebindAndPosition(Player* /*player*/);
     void ResetActionbar(Player* /*player*/);
 
-    void UnlearnAllSpells(Player* /*player*/);
+    void ResetSpells(Player* /*player*/);
     void ResetSkills(Player* /*player*/);
     void DesummonMinion(Player* /*player*/);
     void DesummonPet(Player* /*player*/);
-    void LearnRacials(Player* /*player*/);
-    void LearnClassSpells(Player* /*player*/);
 
     void IterateItems(Player* /*player*/, bool /*deleteEquipped*/);
     void EquipDefaultItems(Player* /*player*/);
@@ -66,6 +81,7 @@ public:
     bool IsProfession(uint32 /*spellId*/);
     bool IsRecipe(uint32 /*spellId*/);
     bool IsHeirloom(Item* /*item*/);
+    bool IsMount(uint32 /*spellId*/);
 
     bool HasItemsEquipped(Player* /*player*/);
 
@@ -91,9 +107,23 @@ public:
 
     float GetBaseMultiplier(bool /*isDeathKnight*/);
 
-    void QueuePrestige(Player* /*player*/, QueueReason /*reason*/);
+    void UpdateQueueState(Player* /*player*/, QueueState /*state*/);
+    void AddPrestigeState(Player* /*player*/, PrestigeState /*state*/);
     void DequeuePrestige(Player* /*player*/);
     void HandleQueue();
+
+    void QueueResetInit(Player* /*player*/);
+    void QueueResetEquipment(Player* /*player*/, PrestigeState* /*state*/);
+    void QueueResetLevel(Player* /*player*/);
+    void QueueResetNewEquipment(Player* /*player*/);
+    void QueueResetHomebindAndPosition(Player* /*player*/);
+    void QueueResetSpells(Player* /*player*/);
+    void QueueResetSkills(Player* /*player*/);
+    void QueueResetActions(Player* /*player*/);
+    void QueueResetActionBar(Player* /*player*/);
+    void QueueResetQuests(Player* /*player*/);
+    void QueueResetDesummonPets(Player* /*player*/);
+    void QueueResetComplete(Player* /*player*/, PrestigeState* /*state*/);
 
     TaskScheduler* GetScheduler();
 
@@ -104,7 +134,7 @@ private:
     std::unordered_map<uint64, int32> prestigeLevels;
     std::unordered_set<uint32> whitelistQuests;
     std::map<uint32, float> itemLevelBrackets;
-    std::unordered_map<Player*, QueueReason> prestigeQueue;
+    std::unordered_map<Player*, PrestigeState> prestigeQueue;
 
     TaskScheduler scheduler;
 };
