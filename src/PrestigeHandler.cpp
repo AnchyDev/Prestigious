@@ -1616,7 +1616,7 @@ void PrestigeHandler::QueueResetDesummonPets(Player* player)
 void PrestigeHandler::QueueResetComplete(Player* player, PrestigeState* state)
 {
     player->SaveToDB(false, false);
-    
+
     if (sConfigMgr->GetOption<bool>("Prestigious.Announcement", true))
     {
         std::string message = state->IsSacrifice ?
