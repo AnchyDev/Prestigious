@@ -322,7 +322,7 @@ void PrestigeHandler::DoPrestige(Player* player, bool sacrificeArmor)
 
     if (sConfigMgr->GetOption<bool>("Prestigious.Announcement", true))
     {
-        sWorld->SendServerMessage(SERVER_MSG_STRING, Acore::StringFormatFmt("|cffFFFFFFPlayer |cff00FF00{} |cffFFFFFFhas prestiged to level |cff00FF00{}!|r", player->GetName(), sPrestigeHandler->GetPrestigeLevel(player)));
+        sWorld->SendServerMessage(SERVER_MSG_STRING, Acore::StringFormatFmt("|cffFFFFFFPlayer |cff00FF00{} |cffFFFFFFhas prestiged to prestige level |cff00FF00{}!|r", player->GetName(), sPrestigeHandler->GetPrestigeLevel(player)));
     }
 }
 
