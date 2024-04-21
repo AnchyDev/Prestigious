@@ -877,7 +877,7 @@ void PrestigeHandler::IterateItems(Player* player, bool deleteEquipped)
                     flagged++;
                 }
 
-                if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Bags", false))
+                if (sConfigMgr->GetOption<bool>("Prestigious.Delete.Bank.Bags", false))
                 {
                     player->DestroyItem(i, j, true);
                     deleted++;
