@@ -1615,6 +1615,27 @@ void PrestigeHandler::QueueResetDesummonPets(Player* player)
 
 void PrestigeHandler::QueueResetComplete(Player* player, PrestigeState* state)
 {
+    if (state->IsSacrifice)
+    {
+        SacrificeRewardPlayer(player, state->AvgItemLevel);
+
+        if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
+        {
+            LOG_INFO("module", "Rewarded player '{}' for sacrificing gear during prestige.", player->GetName());
+        }
+    }
+    else
+    {
+        auto multiplier = GetBaseMultiplier(player->getClass() == CLASS_DEATH_KNIGHT);
+
+        RewardPlayer(player, multiplier);
+
+        if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
+        {
+            LOG_INFO("module", "Rewarded player '{}' for prestiging.", player->GetName());
+        }
+    }
+
     player->SaveToDB(false, false);
 
     if (sConfigMgr->GetOption<bool>("Prestigious.Announcement", true))
