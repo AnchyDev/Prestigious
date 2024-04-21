@@ -82,6 +82,7 @@ public:
     bool IsRecipe(uint32 /*spellId*/);
     bool IsHeirloom(Item* /*item*/);
     bool IsMount(uint32 /*spellId*/);
+    bool IsNonCombatPet(uint32 /*spellId*/);
 
     bool HasItemsEquipped(Player* /*player*/);
 
