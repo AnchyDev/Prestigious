@@ -30,6 +30,15 @@ public:
         ITEM_FIELD_FLAG_PRESTIGE_LOCK = 0x80000000, // This is equivalent to ITEM_FIELD_FLAG_UNK26, which seems to be unused.
         PLAYER_FLAGS_SACRIFICED = 0x80000000, // This is equivalent to PLAYER_FLAGS_UNK31, which seems to be unused.
         MAIL_SENDER_CHROMIE = 555111, // Used as the mail sender for rewards
+        SPELL_AURA_BANISH = 44836, // Banish used to lock player
+    };
+
+    enum QueueReason
+    {
+        QUEUE_RESET_LEVEL = 0,
+        QUEUE_EQUIP_NEW_ITEMS = 1,
+        QUEUE_TELEPORT_PLAYER = 2,
+        QUEUE_DONE = 3,
     };
 
     bool CanPrestige(Player* /*player*/);
@@ -58,6 +67,8 @@ public:
     bool IsRecipe(uint32 /*spellId*/);
     bool IsHeirloom(Item* /*item*/);
 
+    bool HasItemsEquipped(Player* /*player*/);
+
     void RewardPlayer(Player* /*player*/, float /*multiplier*/);
     void SacrificeRewardPlayer(Player* /*player*/, uint32 /*avgLevel*/);
     bool SendMailItems(Player* /*player*/, std::vector<std::pair<uint32, uint32>>& /*mailItems*/, std::string /*header*/, std::string /*body*/);
@@ -80,6 +91,10 @@ public:
 
     float GetBaseMultiplier(bool /*isDeathKnight*/);
 
+    void QueuePrestige(Player* /*player*/, QueueReason /*reason*/);
+    void DequeuePrestige(Player* /*player*/);
+    void HandleQueue();
+
     TaskScheduler* GetScheduler();
 
 private:
@@ -89,6 +104,7 @@ private:
     std::unordered_map<uint64, int32> prestigeLevels;
     std::unordered_set<uint32> whitelistQuests;
     std::map<uint32, float> itemLevelBrackets;
+    std::unordered_map<Player*, QueueReason> prestigeQueue;
 
     TaskScheduler scheduler;
 };

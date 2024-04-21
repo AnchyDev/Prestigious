@@ -11,6 +11,7 @@ void PrestigiousWorldScript::OnUpdate(uint32 diff)
     }
 
     sPrestigeHandler->GetScheduler()->Update(diff);
+    sPrestigeHandler->HandleQueue();
 }
 
 void PrestigiousWorldScript::OnAfterConfigLoad(bool reload)
