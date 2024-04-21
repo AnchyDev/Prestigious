@@ -36,6 +36,11 @@ bool PrestigiousPlayerScript::CanEquipItem(Player* player, uint8 /*slot*/, uint1
         return true;
     }
 
+    if (sPrestigeHandler->IsHeirloom(pItem))
+    {
+        return true;
+    }
+
     if (pItem->HasFlag(ITEM_FIELD_FLAGS, sPrestigeHandler->ITEM_FIELD_FLAG_PRESTIGE_LOCK) &&
         player->GetLevel() < sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
     {

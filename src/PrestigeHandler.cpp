@@ -714,12 +714,8 @@ void PrestigeHandler::IterateItems(Player* player, bool deleteEquipped)
 
             if (sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
             {
-                // Do not flag heirloom items
-                if (!IsHeirloom(item))
-                {
-                    SetItemFlagged(item, true);
-                    flagged++;
-                }
+                SetItemFlagged(item, true);
+                flagged++;
             }
 
             if (deleteEquipped)
