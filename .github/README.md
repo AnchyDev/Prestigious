@@ -1,6 +1,9 @@
 # Prestigious
 This module allows you to prestige, resetting your level back to 1 and resetting quest progress.
 
+> [!IMPORTANT]
+> This module is a work in progress and a bit quirky. Use at your own risk.
+
 ## Setup
 - `Clone` this module into your `./azerothcore-wotlk/modules` directory.
 - `Re-run` CMake.
