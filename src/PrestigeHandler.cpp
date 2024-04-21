@@ -277,14 +277,13 @@ void PrestigeHandler::DoPrestige(Player* player, bool sacrificeArmor)
 
     ResetQuests(player);
 
+    uint32 avgLevel = player->GetAverageItemLevel();
+
     // There are internal checks inside IterateItems for deleting/flagging items.
     IterateItems(player, sacrificeArmor);
 
-    uint32 avgLevel = 0;
-
     if (sacrificeArmor)
     {
-        avgLevel = player->GetAverageItemLevel();
         SacrificeRewardPlayer(player, avgLevel);
 
         if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
