@@ -664,28 +664,25 @@ void PrestigeHandler::ResetActionbar(Player* player)
     // TODO: If a player is lagging this may cause problems, maybe schedule even longer.
     auto scheduleDelay = player->GetSession()->GetLatency() * 2;
 
-    // Schedule the new actions the future to fix actions being deleted by client
-    scheduler.Schedule(1000ms + std::chrono::milliseconds(scheduleDelay), [player, pInfo](TaskContext /*context*/) {
-        if (!player || !pInfo)
+    if (!player || !pInfo)
+    {
+        return;
+    }
+
+    // Repopulate actionbar
+    for (auto it = pInfo->action.begin(); it != pInfo->action.end(); ++it)
+    {
+        auto actionButton = player->addActionButton(it->button, it->action, it->type);
+        if (!actionButton)
         {
-            return;
+            continue;
         }
 
-        // Repopulate actionbar
-        for (auto it = pInfo->action.begin(); it != pInfo->action.end(); ++it)
-        {
-            auto actionButton = player->addActionButton(it->button, it->action, it->type);
-            if (!actionButton)
-            {
-                continue;
-            }
+        actionButton->uState = ACTIONBUTTON_NEW;
+    }
 
-            actionButton->uState = ACTIONBUTTON_NEW;
-        }
-
-        // Send new actions to client
-        player->SendActionButtons(1);
-    });
+    // Send new actions to client
+    player->SendActionButtons(1);
 }
 
 void PrestigeHandler::IterateItems(Player* player, bool deleteEquipped)
