@@ -280,9 +280,11 @@ void PrestigeHandler::DoPrestige(Player* player, bool sacrificeArmor)
     // There are internal checks inside IterateItems for deleting/flagging items.
     IterateItems(player, sacrificeArmor);
 
+    uint32 avgLevel = 0;
+
     if (sacrificeArmor)
     {
-        uint32 avgLevel = player->GetAverageItemLevel();
+        avgLevel = player->GetAverageItemLevel();
         SacrificeRewardPlayer(player, avgLevel);
 
         if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
@@ -328,7 +330,11 @@ void PrestigeHandler::DoPrestige(Player* player, bool sacrificeArmor)
 
     if (sConfigMgr->GetOption<bool>("Prestigious.Announcement", true))
     {
-        sWorld->SendServerMessage(SERVER_MSG_STRING, Acore::StringFormatFmt("|cffFFFFFFPlayer |cff00FF00{} |cffFFFFFFhas prestiged to prestige level |cff00FF00{}!|r", player->GetName(), sPrestigeHandler->GetPrestigeLevel(player)));
+        std::string message = sacrificeArmor ?
+            Acore::StringFormatFmt("|cffFFFFFFPlayer |cff00FF00{} has |cffFF0000sacrificed|cffFFFFFF their item level |cff00FF00{}|cffFFFFFF equipment |cffFFFFFFprestiging to prestige level |cff00FF00{}!|r", player->GetName(), avgLevel, sPrestigeHandler->GetPrestigeLevel(player))  :
+            Acore::StringFormatFmt("|cffFFFFFFPlayer |cff00FF00{} |cffFFFFFFhas prestiged to prestige level |cff00FF00{}!|r", player->GetName(), sPrestigeHandler->GetPrestigeLevel(player));
+
+        sWorld->SendServerMessage(SERVER_MSG_STRING, message);
     }
 }
 
