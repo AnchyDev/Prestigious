@@ -974,11 +974,6 @@ bool PrestigeHandler::IsHeirloom(Item* item)
 
 void PrestigeHandler::RewardPlayer(Player* player, float multiplier)
 {
-    if (player->getClass() == CLASS_DEATH_KNIGHT)
-    {
-        multiplier = multiplier * sConfigMgr->GetOption<float>("Prestigious.Reward.Multiplier.DeathKnight", 0.33f);
-    }
-
     auto prestigeLevel = GetPrestigeLevel(player);
     std::vector<std::pair<uint32, uint32>> mailItems;
 
