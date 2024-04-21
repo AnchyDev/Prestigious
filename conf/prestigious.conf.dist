@@ -17,6 +17,15 @@
 Prestigious.Enable = 0
 
 #
+#    Prestigious.Debug
+#        Description: Enable debug messages in console.
+#        Default:     0 - Disabled
+#                     1 - Enabled
+#
+
+Prestigious.Debug = 0
+
+#
 #   Prestigious.Delete.Inventory
 #        Description: Deletes inventory items when prestiging.
 #        Default:     0 - Disabled

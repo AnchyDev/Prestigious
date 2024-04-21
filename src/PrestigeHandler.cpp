@@ -285,7 +285,10 @@ void PrestigeHandler::DoPrestige(Player* player, bool sacrificeArmor)
         uint32 avgLevel = player->GetAverageItemLevel();
         SacrificeRewardPlayer(player, avgLevel);
 
-        LOG_INFO("module", "Rewarded player '{}' for sacrificing gear during prestige.", player->GetName());
+        if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
+        {
+            LOG_INFO("module", "Rewarded player '{}' for sacrificing gear during prestige.", player->GetName());
+        }
     }
     else
     {
@@ -293,7 +296,10 @@ void PrestigeHandler::DoPrestige(Player* player, bool sacrificeArmor)
 
         RewardPlayer(player, multiplier);
 
-        LOG_INFO("module", "Rewarded player '{}' for prestiging.", player->GetName());
+        if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
+        {
+            LOG_INFO("module", "Rewarded player '{}' for prestiging.", player->GetName());
+        }
     }
 
     EquipDefaultItems(player);
@@ -328,7 +334,10 @@ void PrestigeHandler::DoPrestige(Player* player, bool sacrificeArmor)
 
 void PrestigeHandler::ResetLevel(Player* player)
 {
-    LOG_INFO("module", "Prestige> Resetting player level..");
+    if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
+    {
+        LOG_INFO("module", "Prestige> Resetting player level..");
+    }
 
     uint32 isHeroClass = player->getClass() == CLASS_DEATH_KNIGHT;
     uint32 level = isHeroClass ? 55 : 1;
@@ -336,12 +345,18 @@ void PrestigeHandler::ResetLevel(Player* player)
     player->SetLevel(level, true);
     player->InitStatsForLevel(true);
 
-    LOG_INFO("module", "Prestige> Player level reset to '{}'.", level);
+    if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
+    {
+        LOG_INFO("module", "Prestige> Player level reset to '{}'.", level);
+    }
 }
 
 void PrestigeHandler::UnlearnAllSpells(Player* player)
 {
-    LOG_INFO("module", "Prestige> Unlearning player spells..");
+    if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
+    {
+        LOG_INFO("module", "Prestige> Unlearning player spells..");
+    }
 
     auto spellMap = player->GetSpellMap();
     for (auto& spellEntry : spellMap)
@@ -373,7 +388,10 @@ void PrestigeHandler::UnlearnAllSpells(Player* player)
         player->removeSpell(spellId, SPEC_MASK_ALL, false);
     }
 
-    LOG_INFO("module", "Prestige> Player spells unlearned.");
+    if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
+    {
+        LOG_INFO("module", "Prestige> Player spells unlearned.");
+    }
 }
 
 void PrestigeHandler::ResetSkills(Player* player)
@@ -439,7 +457,10 @@ void PrestigeHandler::DesummonPet(Player* player)
 
 void PrestigeHandler::LearnRacials(Player* player)
 {
-    LOG_INFO("module", "Prestige> Learning player racials..");
+    if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
+    {
+        LOG_INFO("module", "Prestige> Learning player racials..");
+    }
 
     auto it = racialMap.find(static_cast<Races>(player->getRace()));
     if (it == racialMap.end())
@@ -461,12 +482,18 @@ void PrestigeHandler::LearnRacials(Player* player)
         player->learnSpell(racial);
     }
 
-    LOG_INFO("module", "Prestige> Player racial spells learned.");
+    if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
+    {
+        LOG_INFO("module", "Prestige> Player racial spells learned.");
+    }
 }
 
 void PrestigeHandler::LearnClassSpells(Player* player)
 {
-    LOG_INFO("module", "Prestige> Learning player class spells..");
+    if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
+    {
+        LOG_INFO("module", "Prestige> Learning player class spells..");
+    }
 
     auto it = spellMap.find(static_cast<Classes>(player->getClass()));
     if (it == spellMap.end())
@@ -507,12 +534,18 @@ void PrestigeHandler::LearnClassSpells(Player* player)
         player->CastSpell(player, castSpell, true);
     }
 
-    LOG_INFO("module", "Prestige> Player class spells learned.");
+    if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
+    {
+        LOG_INFO("module", "Prestige> Player class spells learned.");
+    }
 }
 
 void PrestigeHandler::ResetQuests(Player* player)
 {
-    LOG_INFO("module", "Prestige> Resetting player quest status..");
+    if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
+    {
+        LOG_INFO("module", "Prestige> Resetting player quest status..");
+    }
 
     player->ResetDailyQuestStatus();
     player->ResetWeeklyQuestStatus();
@@ -559,12 +592,18 @@ void PrestigeHandler::ResetQuests(Player* player)
         player->SetQuestSlotState(questSlot, QUEST_STATE_NONE);
     }
 
-    LOG_INFO("module", "Prestige> Player quest status reset.");
+    if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
+    {
+        LOG_INFO("module", "Prestige> Player quest status reset.");
+    }
 }
 
 void PrestigeHandler::ResetHomebindAndPosition(Player* player)
 {
-    LOG_INFO("module", "Prestige> Resetting player homebind and position..");
+    if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
+    {
+        LOG_INFO("module", "Prestige> Resetting player homebind and position..");
+    }
 
     auto playerInfo = sObjectMgr->GetPlayerInfo(player->getRace(), player->getClass());
 
@@ -587,7 +626,10 @@ void PrestigeHandler::ResetHomebindAndPosition(Player* player)
 
     player->TeleportTo(worldLoc);
 
-    LOG_INFO("module", "Prestige> Player homebind and position reset.");
+    if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
+    {
+        LOG_INFO("module", "Prestige> Player homebind and position reset.");
+    }
 }
 
 void PrestigeHandler::ResetActionbar(Player* player)
@@ -643,7 +685,10 @@ void PrestigeHandler::ResetActionbar(Player* player)
 
 void PrestigeHandler::IterateItems(Player* player, bool deleteEquipped)
 {
-    LOG_INFO("module", "Prestige> Deleting/flagging player items..");
+    if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
+    {
+        LOG_INFO("module", "Prestige> Deleting/flagging player items..");
+    }
 
     uint32 flagged = 0;
     uint32 deleted = 0;
@@ -854,8 +899,11 @@ void PrestigeHandler::IterateItems(Player* player, bool deleteEquipped)
         }
     }
 
-    LOG_INFO("module", "Prestige> {} player items were deleted.", deleted);
-    LOG_INFO("module", "Prestige> {} player items were flagged.", flagged);
+    if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
+    {
+        LOG_INFO("module", "Prestige> {} player items were deleted.", deleted);
+        LOG_INFO("module", "Prestige> {} player items were flagged.", flagged);
+    }
 }
 
 void PrestigeHandler::EquipDefaultItems(Player* player)
@@ -996,7 +1044,10 @@ void PrestigeHandler::RewardPlayer(Player* player, float multiplier)
 
         mailItems.push_back(std::pair(reward.Entry, count));
 
-        LOG_INFO("module", "Adding reward '{}' with count '{}' to player '{}'.", reward.Entry, reward.Count * multiplier, player->GetName());
+        if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
+        {
+            LOG_INFO("module", "Adding reward '{}' with count '{}' to player '{}'.", reward.Entry, reward.Count * multiplier, player->GetName());
+        }
     }
 
     auto title = sConfigMgr->GetOption<std::string>("Prestigious.Reward.Mail.Title", "Prestige Reward");
@@ -1109,7 +1160,10 @@ void PrestigeHandler::SetItemFlagged(Item* item, bool flag)
 
 void PrestigeHandler::UnflagItems(Player* player)
 {
-    LOG_INFO("module", "Prestige> Unflagging player items..");
+    if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
+    {
+        LOG_INFO("module", "Prestige> Unflagging player items..");
+    }
 
     uint32 unflagged = 0;
 
@@ -1224,7 +1278,10 @@ void PrestigeHandler::UnflagItems(Player* player)
         }
     }
 
-    LOG_INFO("module", "Prestige> {} player items were unflagged.", unflagged);
+    if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
+    {
+        LOG_INFO("module", "Prestige> {} player items were unflagged.", unflagged);
+    }
 }
 
 float PrestigeHandler::GetMultiplierForItemLevel(uint32 itemLevel, bool isDeathKnight)
@@ -1246,7 +1303,10 @@ float PrestigeHandler::GetMultiplierForItemLevel(uint32 itemLevel, bool isDeathK
 
 void PrestigeHandler::LoadPrestigeLevels()
 {
-    LOG_INFO("module", "Loading prestige levels from 'prestige_tracker' table..");
+    if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
+    {
+        LOG_INFO("module", "Loading prestige levels from 'prestige_tracker' table..");
+    }
 
     auto qResult = CharacterDatabase.Query("SELECT * FROM `prestige_tracker`");
 
@@ -1267,7 +1327,10 @@ void PrestigeHandler::LoadPrestigeLevels()
         prestigeLevels.emplace(guid, level);
     } while (qResult->NextRow());
 
-    LOG_INFO("module", ">> Loaded '{}' prestige levels.", prestigeLevels.size());
+    if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
+    {
+        LOG_INFO("module", ">> Loaded '{}' prestige levels.", prestigeLevels.size());
+    }
 }
 
 void PrestigeHandler::SavePrestigeLevels()
