@@ -299,6 +299,8 @@ void PrestigeHandler::DoPrestige(Player* player, bool sacrificeArmor)
     EquipDefaultItems(player);
 
     UnlearnAllSpells(player);
+    ResetSkills(player);
+
     DesummonMinion(player);
     DesummonPet(player);
 
@@ -372,6 +374,40 @@ void PrestigeHandler::UnlearnAllSpells(Player* player)
     }
 
     LOG_INFO("module", "Prestige> Player spells unlearned.");
+}
+
+void PrestigeHandler::ResetSkills(Player* player)
+{
+    auto maxSkillLevel = player->GetMaxSkillValueForLevel();
+
+    if (sConfigMgr->GetOption<bool>("Prestigious.ResetSkills.Weapons", true))
+    {
+        player->SetSkill(SKILL_UNARMED, 1, 1, maxSkillLevel);
+
+        player->SetSkill(SKILL_2H_MACES, 1, 1, maxSkillLevel);
+        player->SetSkill(SKILL_2H_AXES, 1, 1, maxSkillLevel);
+        player->SetSkill(SKILL_2H_SWORDS, 1, 1, maxSkillLevel);
+
+        player->SetSkill(SKILL_MACES, 1, 1, maxSkillLevel);
+        player->SetSkill(SKILL_AXES, 1, 1, maxSkillLevel);
+        player->SetSkill(SKILL_SWORDS, 1, 1, maxSkillLevel);
+        player->SetSkill(SKILL_DAGGERS, 1, 1, maxSkillLevel);
+        player->SetSkill(SKILL_FIST_WEAPONS, 1, 1, maxSkillLevel);
+
+        player->SetSkill(SKILL_STAVES, 1, 1, maxSkillLevel);
+        player->SetSkill(SKILL_POLEARMS, 1, 1, maxSkillLevel);
+
+        player->SetSkill(SKILL_GUNS, 1, 1, maxSkillLevel);
+        player->SetSkill(SKILL_BOWS, 1, 1, maxSkillLevel);
+        player->SetSkill(SKILL_CROSSBOWS, 1, 1, maxSkillLevel);
+        player->SetSkill(SKILL_WANDS, 1, 1, maxSkillLevel);
+        player->SetSkill(SKILL_THROWN, 1, 1, maxSkillLevel);
+    }
+
+    if (sConfigMgr->GetOption<bool>("Prestigious.ResetSkills.Defense", true))
+    {
+        player->SetSkill(SKILL_DEFENSE, 1, 1, maxSkillLevel);
+    }
 }
 
 void PrestigeHandler::DesummonMinion(Player* player)

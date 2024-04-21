@@ -108,6 +108,24 @@ Prestigious.FlagItems = 1
 Prestigious.ResetActionbar = 1
 
 #
+#   Prestigious.ResetSkills.Weapons
+#        Description: Resets the players weapon skills when prestiging.
+#                     0 - Disabled
+#        Default:     1 - Enabled
+#
+
+Prestigious.ResetSkills.Weapons = 1
+
+#
+#   Prestigious.ResetSkills.Defense
+#        Description: Resets the players defense skills when prestiging.
+#                     0 - Disabled
+#        Default:     1 - Enabled
+#
+
+Prestigious.ResetSkills.Defense = 1
+
+#
 #	Prestigious.Reward.Multiplier.Base
 #		Description: This is the base multiplier which is multiplied by the database multipliers.
 #		Type:		 Float
