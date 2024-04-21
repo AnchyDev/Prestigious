@@ -334,7 +334,6 @@ void PrestigeHandler::DoPrestige(Player* player, bool sacrificeArmor)
             Acore::StringFormatFmt("|cffFFFFFFPlayer |cff00FF00{} |cffFFFFFFhas prestiged to prestige level |cff00FF00{}!|r", player->GetName(), sPrestigeHandler->GetPrestigeLevel(player));
 
         sWorld->SendServerMessage(SERVER_MSG_STRING, message);
-        player->SendSystemMessage(message);
     }
 }
 
