@@ -404,7 +404,7 @@ void PrestigeHandler::ResetSkills(Player* player)
             continue;
         }
 
-        player->SetSkill(skill, 1, 1, player->GetMaxSkillValueForLevel());
+        player->SetSkill(skill, 1, player->getClass() == CLASS_DEATH_KNIGHT ? 270 : 1, player->GetMaxSkillValueForLevel());
     }
 }
 
