@@ -274,6 +274,7 @@ void PrestigeHandler::ResetLevel(Player* player)
     uint32 level = isHeroClass ? 55 : 1;
 
     player->SetLevel(level, true);
+    player->SetUInt32Value(PLAYER_XP, 0);
     player->InitStatsForLevel(true);
 
     if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
