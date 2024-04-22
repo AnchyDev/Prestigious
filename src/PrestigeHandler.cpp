@@ -32,7 +32,7 @@ PrestigeHandler::PrestigeHandler()
         racialMap.emplace(RACE_NIGHTELF, std::unordered_set<uint32>{
             21009, // Elusiveness
             20583, // Nature Resistance
-            20583, // Quickness
+            20582, // Quickness
             58984, // Shadowmeld
             20585, // Wisp Spirit
 
@@ -335,6 +335,26 @@ void PrestigeHandler::ResetSpells(Player* player)
         }
 
         player->removeSpell(spellId, SPEC_MASK_ALL, false);
+    }
+
+    // When removing ranked spells, we need to re-send the learn packet to the client
+    // so they know they have the lower ranked spells.
+    for (auto& spell : player->GetSpellMap())
+    {
+        uint32 spellId = spell.first;
+        auto spellInfo = sSpellMgr->GetSpellInfo(spellId);
+
+        if (!spellInfo)
+        {
+            continue;
+        }
+
+        if (!spellInfo->IsRanked())
+        {
+            continue;
+        }
+        
+        player->SendLearnPacket(spellId, true);
     }
 
     if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
@@ -923,6 +943,28 @@ bool PrestigeHandler::HasItemsEquipped(Player* player)
     }
 
     return hasEquipped;
+}
+
+bool PrestigeHandler::HasNonStarterSpells(Player* player)
+{
+    auto spells = player->GetSpellMap();
+
+    bool flag = false;
+
+    for (auto& spell : spells)
+    {
+        uint32 spellId = spell.first;
+
+        if (IsRacialSpell(player->getRace(), spellId) ||
+            IsClassStarterSpell(player->getClass(), spellId))
+        {
+            continue;
+        }
+
+        flag = true;
+    }
+
+    return flag;
 }
 
 void PrestigeHandler::RewardPlayer(Player* player, float multiplier)
@@ -1622,6 +1664,12 @@ void PrestigeHandler::QueueResetSpells(Player* player)
 
 void PrestigeHandler::QueueResetSkills(Player* player)
 {
+    // Wait for all spells to be unlearned
+    if (HasNonStarterSpells(player))
+    {
+        return;
+    }
+
     ResetSkills(player);
 
     UpdateQueueState(player, QueueState::QUEUE_RESET_ACTIONS);

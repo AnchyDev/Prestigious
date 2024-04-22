@@ -85,6 +85,7 @@ public:
     bool IsNonCombatPet(uint32 /*spellId*/);
 
     bool HasItemsEquipped(Player* /*player*/);
+    bool HasNonStarterSpells(Player* /*player*/);
 
     void RewardPlayer(Player* /*player*/, float /*multiplier*/);
     void SacrificeRewardPlayer(Player* /*player*/, uint32 /*avgLevel*/);
