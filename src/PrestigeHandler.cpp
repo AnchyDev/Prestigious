@@ -1500,7 +1500,11 @@ void PrestigeHandler::HandleQueue()
         Player* player = item.first;
         PrestigeState* state = &item.second;
 
-        if (!player)
+        if (!player ||
+            !player->IsInWorld() ||
+            player->IsBeingTeleported() ||
+            !player->GetSession() ||
+            player->GetSession()->IsKicked())
         {
             continue;
         }
