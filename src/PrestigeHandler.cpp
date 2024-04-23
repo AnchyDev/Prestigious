@@ -981,7 +981,10 @@ bool PrestigeHandler::HasNonStarterSpells(Player* player)
             continue;
         }
 
-        LOG_INFO("module", "non-started spell found {} in spec {} player specmask {} spell specmask {}", spellId, isInSpec, player->GetActiveSpec(), uint32(spellState->specMask));
+        if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
+        {
+            LOG_INFO("module", "non-started spell found {} in spec {} player specmask {} spell specmask {} for player {}", spellId, isInSpec, player->GetActiveSpec(), uint32(spellState->specMask), player->GetName());
+        }
 
         return true;
     }
