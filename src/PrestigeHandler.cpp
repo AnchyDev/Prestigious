@@ -957,8 +957,6 @@ bool PrestigeHandler::HasNonStarterSpells(Player* player)
 {
     auto spells = player->GetSpellMap();
 
-    bool flag = false;
-
     for (auto& spell : spells)
     {
         uint32 spellId = spell.first;
@@ -975,21 +973,26 @@ bool PrestigeHandler::HasNonStarterSpells(Player* player)
             continue;
         }
 
-        if (spellState->State == PLAYERSPELL_REMOVED)
+        if (spellState->State == PLAYERSPELL_REMOVED ||
+            spellState->State == PLAYERSPELL_TEMPORARY)
         {
             continue;
         }
+
+        bool isInSpec = spellState->IsInSpec(player->GetActiveSpec());
 
         if (!spellState->Active ||
-            !spellState->IsInSpec(player->GetActiveSpec()))
+            !isInSpec)
         {
             continue;
         }
 
-        flag = true;
+        LOG_INFO("module", "non-started spell found {} in spec {} player specmask {} spell specmask {}", spellId, isInSpec, player->GetActiveSpec(), uint32(spellState->specMask));
+
+        return true;
     }
 
-    return flag;
+    return false;
 }
 
 void PrestigeHandler::RewardPlayer(Player* player, float multiplier)
