@@ -981,7 +981,7 @@ bool PrestigeHandler::HasNonStarterSpells(Player* player)
         }
 
         if (!spellState->Active ||
-            spellState->IsInSpec(player->GetActiveSpec()))
+            !spellState->IsInSpec(player->GetActiveSpec()))
         {
             continue;
         }
