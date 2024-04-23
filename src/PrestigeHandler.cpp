@@ -304,6 +304,8 @@ void PrestigeHandler::ResetSpells(Player* player)
         if (IsRacialSpell(player->getRace(), spellId) ||
             IsClassStarterSpell(player->getClass(), spellId))
         {
+            // Send the unlearn packet and re-learn them after.
+            player->SendLearnPacket(spellId, false);
             continue;
         }
 
@@ -352,17 +354,9 @@ void PrestigeHandler::ResendRankedSpells(Player* player)
     for (auto& spell : player->GetSpellMap())
     {
         uint32 spellId = spell.first;
-        auto spellState = spell.second;
-        auto spellInfo = sSpellMgr->GetSpellInfo(spellId);
 
-        if (!spellInfo ||
-            !spellState)
-        {
-            continue;
-        }
-
-        if (!spellInfo->IsRanked() ||
-            spellState->State == PLAYERSPELL_REMOVED)
+        if (!IsRacialSpell(player->getRace(), spellId) &&
+            !IsClassStarterSpell(player->getClass(), spellId))
         {
             continue;
         }
