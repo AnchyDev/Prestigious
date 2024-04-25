@@ -128,103 +128,279 @@ PrestigeHandler::PrestigeHandler()
         spellMap.emplace(CLASS_PALADIN, std::unordered_set<uint32>{
             6603, // Auto Attack
             107, // Block
-            81, // Dodge
+                81, // Dodge
 
-            635, // Holy Light
-            21084, // Seal of Righteousness
+                635, // Holy Light
+                21084, // Seal of Righteousness
         });
 
         spellMap.emplace(CLASS_HUNTER, std::unordered_set<uint32>{
             6603, // Auto Attack
-            81, // Dodge
+                81, // Dodge
 
-            75, // Auto Shot
-            2973, // Raptor Strike
+                75, // Auto Shot
+                2973, // Raptor Strike
         });
 
         spellMap.emplace(CLASS_ROGUE, std::unordered_set<uint32>{
             6603, // Auto Attack
-            81, // Dodge
-            674, // Dual Wield
-            2764, // Throw
+                81, // Dodge
+                674, // Dual Wield
+                2764, // Throw
 
-            2098, // Eviscerate
-            1752, // Sinister Strike
+                2098, // Eviscerate
+                1752, // Sinister Strike
         });
 
         spellMap.emplace(CLASS_PRIEST, std::unordered_set<uint32>{
             6603, // Auto Attack
-            81, // Dodge
-            5019, // Shoot
+                81, // Dodge
+                5019, // Shoot
 
-            2050, // Lesser Heal
-            585, // Smite
+                2050, // Lesser Heal
+                585, // Smite
         });
 
         spellMap.emplace(CLASS_SHAMAN, std::unordered_set<uint32>{
             6603, // Auto Attack
-            107, // Block
-            81, // Dodge
+                107, // Block
+                81, // Dodge
 
-            403, // Lightning Bolt
-            331, // Healing Wave
+                403, // Lightning Bolt
+                331, // Healing Wave
         });
 
         spellMap.emplace(CLASS_MAGE, std::unordered_set<uint32>{
             6603, // Auto Attack
-            81, // Dodge
-            5019, // Shoot
+                81, // Dodge
+                5019, // Shoot
 
-            133, // Fireball
-            168, // Frost Armor
+                133, // Fireball
+                168, // Frost Armor
         });
 
         spellMap.emplace(CLASS_WARLOCK, std::unordered_set<uint32>{
             6603, // Auto Attack
-            81, // Dodge
-            5019, // Shoot
+                81, // Dodge
+                5019, // Shoot
 
-            687, // Demon Skin
-            686, // Shadow Bolt
+                687, // Demon Skin
+                686, // Shadow Bolt
         });
 
         spellMap.emplace(CLASS_DRUID, std::unordered_set<uint32>{
             6603, // Auto Attack
-            81, // Dodge
+                81, // Dodge
 
-            5176, // Wrath
-            5185, // Healing Touch
+                5176, // Wrath
+                5185, // Healing Touch
         });
 
         spellMap.emplace(CLASS_DEATH_KNIGHT, std::unordered_set<uint32>{
             6603, // Auto Attack
-            81, // Dodge
-            674, // Dual Wield
+                81, // Dodge
+                674, // Dual Wield
 
-            10846, // First Aid (Rank 4)
-            18632, // Heavy Runecloth Bandage
-            18629, // Runecloth Bandage
-            10841, // Heavy Mageweave Bandage
-            10840, // Mageweave Bandage
-            7929, // Heavy Silk Bandage
-            7928, // Silk Bandage
-            3278, // Heavy Wool Bandage
-            3277, // Wool Bandage
-            3276, // Heavy Linen Bandage
-            3275, // Linen Bandage
-            7934, // Anti-Venom
+                10846, // First Aid (Rank 4)
+                18632, // Heavy Runecloth Bandage
+                18629, // Runecloth Bandage
+                10841, // Heavy Mageweave Bandage
+                10840, // Mageweave Bandage
+                7929, // Heavy Silk Bandage
+                7928, // Silk Bandage
+                3278, // Heavy Wool Bandage
+                3277, // Wool Bandage
+                3276, // Heavy Linen Bandage
+                3275, // Linen Bandage
+                7934, // Anti-Venom
 
-            48266, // Blood Presence
-            45902, // Blood Strike
-            49410, // Forceful Deflection
-            59921, // Frost Fever
-            45477, // Icy Touch
-            61455, // Runic Focus
-            59879, // Blood Plague
-            47541, // Death Coil
-            49576, // Death Grip
-            45462, // Plague Strike
+                48266, // Blood Presence
+                45902, // Blood Strike
+                49410, // Forceful Deflection
+                59921, // Frost Fever
+                45477, // Icy Touch
+                61455, // Runic Focus
+                59879, // Blood Plague
+                47541, // Death Coil
+                49576, // Death Grip
+                45462, // Plague Strike
         });
+    }
+
+    // Professions
+    {
+        // Alchemy
+        {
+            professionMap.emplace(2259); // Alchemy - Rank 1
+            professionMap.emplace(3101); // Alchemy - Rank 2
+            professionMap.emplace(3464); // Alchemy - Rank 3
+            professionMap.emplace(11611); // Alchemy - Rank 4
+            professionMap.emplace(28596); // Alchemy - Rank 5
+            professionMap.emplace(51304); // Alchemy - Rank 6
+        }
+
+        // Blacksmithing
+        {
+            professionMap.emplace(2018); // Blacksmithing - Rank 1
+            professionMap.emplace(3100); // Blacksmithing - Rank 2
+            professionMap.emplace(3538); // Blacksmithing - Rank 3
+            professionMap.emplace(9785); // Blacksmithing - Rank 4
+            professionMap.emplace(29844); // Blacksmithing - Rank 5
+            professionMap.emplace(51300); // Blacksmithing - Rank 6
+        }
+
+        // Enchanting
+        {
+            professionMap.emplace(7411); // Enchanting - Rank 1
+            professionMap.emplace(7412); // Enchanting - Rank 2
+            professionMap.emplace(7413); // Enchanting - Rank 3
+            professionMap.emplace(13920); // Enchanting - Rank 4
+            professionMap.emplace(28029); // Enchanting - Rank 5
+            professionMap.emplace(51313); // Enchanting - Rank 6
+            professionMap.emplace(13262); // Enchanting - Disenchant
+        }
+
+        // Engineering
+        {
+            professionMap.emplace(4036); // Engineering - Rank 1
+            professionMap.emplace(49383); // Engineering - Rank 1
+            professionMap.emplace(4037); // Engineering - Rank 2
+            professionMap.emplace(4038); // Engineering - Rank 3
+            professionMap.emplace(12656); // Engineering - Rank 4
+            professionMap.emplace(30350); // Engineering - Rank 5
+            professionMap.emplace(51306); // Engineering - Rank 6
+        }
+
+        // Herbalism
+        {
+            professionMap.emplace(2383); // Herbalism - Find Herbs
+            professionMap.emplace(32605); // Herbalism - Rank 1
+            professionMap.emplace(2366); // Herbalism - Rank 1
+            professionMap.emplace(2368); // Herbalism - Rank 2
+            professionMap.emplace(3570); // Herbalism - Rank 3
+            professionMap.emplace(11993); // Herbalism - Rank 4
+            professionMap.emplace(28695); // Herbalism - Rank 5
+            professionMap.emplace(50300); // Herbalism - Rank 6
+            professionMap.emplace(55428); // Herbalism - Lifeblood - Rank 1
+            professionMap.emplace(55480); // Herbalism - Lifeblood - Rank 2
+            professionMap.emplace(55500); // Herbalism - Lifeblood - Rank 3
+            professionMap.emplace(55501); // Herbalism - Lifeblood - Rank 4
+            professionMap.emplace(55502); // Herbalism - Lifeblood - Rank 5
+            professionMap.emplace(55503); // Herbalism - Lifeblood - Rank 6
+        }
+
+        // Inscription
+        {
+            professionMap.emplace(45357); // Inscription - Rank 1
+            professionMap.emplace(45358); // Inscription - Rank 2
+            professionMap.emplace(45359); // Inscription - Rank 3
+            professionMap.emplace(45360); // Inscription - Rank 4
+            professionMap.emplace(45361); // Inscription - Rank 5
+            professionMap.emplace(45363); // Inscription - Rank 6
+        }
+
+        // Jewelcrafting
+        {
+            professionMap.emplace(25229); // Jewelcrafting - Rank 1
+            professionMap.emplace(25230); // Jewelcrafting - Rank 2
+            professionMap.emplace(28894); // Jewelcrafting - Rank 3
+            professionMap.emplace(28895); // Jewelcrafting - Rank 4
+            professionMap.emplace(28897); // Jewelcrafting - Rank 5
+            professionMap.emplace(51311); // Jewelcrafting - Rank 6
+            professionMap.emplace(31252); // Jewelcrafting - Prospecting
+        }
+
+        // Leatherworking
+        {
+            professionMap.emplace(2108); // Leatherworking - Rank 1
+            professionMap.emplace(3104); // Leatherworking - Rank 2
+            professionMap.emplace(3811); // Leatherworking - Rank 3
+            professionMap.emplace(10662); // Leatherworking - Rank 4
+            professionMap.emplace(32549); // Leatherworking - Rank 5
+            professionMap.emplace(51301); // Leatherworking - Rank 6
+            professionMap.emplace(10660); // Leatherworking - Tribal
+            professionMap.emplace(10658); // Leatherworking - Elemental
+            professionMap.emplace(10656); // Leatherworking - Dragonscale
+        }
+
+        // Mining
+        {
+            professionMap.emplace(32606); // Mining - Rank 1
+            professionMap.emplace(2575); // Mining - Rank 1
+            professionMap.emplace(2576); // Mining - Rank 2
+            professionMap.emplace(3564); // Mining - Rank 3
+            professionMap.emplace(10248); // Mining - Rank 4
+            professionMap.emplace(29354); // Mining - Rank 5
+            professionMap.emplace(50310); // Mining - Rank 6
+            professionMap.emplace(53120); // Mining - Toughness - Rank 1
+            professionMap.emplace(53121); // Mining - Toughness - Rank 2
+            professionMap.emplace(53122); // Mining - Toughness - Rank 3
+            professionMap.emplace(53123); // Mining - Toughness - Rank 4
+            professionMap.emplace(53124); // Mining - Toughness - Rank 5
+            professionMap.emplace(53040); // Mining - Toughness - Rank 6
+            professionMap.emplace(2656); // Mining - Smelting
+            professionMap.emplace(2580); // Mining - Find Minerals
+        }
+
+        // Skinning
+        {
+            professionMap.emplace(8613); // Skinning - Rank 1
+            professionMap.emplace(8617); // Skinning - Rank 2
+            professionMap.emplace(8618); // Skinning - Rank 3
+            professionMap.emplace(10768); // Skinning - Rank 4
+            professionMap.emplace(32678); // Skinning - Rank 5
+            professionMap.emplace(50305); // Skinning - Rank 6
+            professionMap.emplace(53125); // Skinning - Master of Anatomy - Rank 1
+            professionMap.emplace(53662); // Skinning - Master of Anatomy - Rank 2
+            professionMap.emplace(53663); // Skinning - Master of Anatomy - Rank 3
+            professionMap.emplace(53664); // Skinning - Master of Anatomy - Rank 4
+            professionMap.emplace(53665); // Skinning - Master of Anatomy - Rank 5
+            professionMap.emplace(53666); // Skinning - Master of Anatomy - Rank 6
+        }
+
+        // Tailoring
+        {
+            professionMap.emplace(3908); // Tailoring - Rank 1
+            professionMap.emplace(3909); // Tailoring - Rank 2
+            professionMap.emplace(3910); // Tailoring - Rank 3
+            professionMap.emplace(12180); // Tailoring - Rank 4
+            professionMap.emplace(26790); // Tailoring - Rank 5
+            professionMap.emplace(51309); // Tailoring - Rank 6
+            professionMap.emplace(26797); // Tailoring - Spellfire
+            professionMap.emplace(26801); // Tailoring - Shadoweave
+            professionMap.emplace(26798); // Tailoring - Mooncloth
+        }
+
+        // Cooking
+        {
+            professionMap.emplace(2550); // Cooking - Rank 1
+            professionMap.emplace(3102); // Cooking - Rank 2
+            professionMap.emplace(3413); // Cooking - Rank 3
+            professionMap.emplace(18260); // Cooking - Rank 4
+            professionMap.emplace(33359); // Cooking - Rank 5
+            professionMap.emplace(51296); // Cooking - Rank 6
+        }
+
+        // First Aid
+        {
+            professionMap.emplace(3273); // First Aid - Rank 1
+            professionMap.emplace(3274); // First Aid - Rank 2
+            professionMap.emplace(7924); // First Aid - Rank 3
+            professionMap.emplace(10846); // First Aid - Rank 4
+            professionMap.emplace(27028); // First Aid - Rank 5
+            professionMap.emplace(45542); // First Aid - Rank 6
+        }
+
+        // Fishing
+        {
+            professionMap.emplace(7620); // Fishing - Rank 1
+            professionMap.emplace(7731); // Fishing - Rank 2
+            professionMap.emplace(7732); // Fishing - Rank 3
+            professionMap.emplace(18248); // Fishing - Rank 4
+            professionMap.emplace(33095); // Fishing - Rank 5
+            professionMap.emplace(51294); // Fishing - Rank 6
+            professionMap.emplace(43308); // Fishing - Find Fish
+        }
     }
 }
 
@@ -828,7 +1004,7 @@ bool PrestigeHandler::IsProfession(uint32 spellId)
         return false;
     }
 
-    if (spellInfo->Effects[0].Effect != SPELL_EFFECT_TRADE_SKILL)
+    if (professionMap.find(spellId) == professionMap.end())
     {
         return false;
     }

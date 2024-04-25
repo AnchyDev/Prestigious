@@ -135,6 +135,7 @@ public:
 private:
     std::unordered_map<Races, std::unordered_set<uint32>> racialMap;
     std::unordered_map<Classes, std::unordered_set<uint32>> spellMap;
+    std::unordered_set<uint32> professionMap;
     std::vector<PrestigeReward> rewards;
     std::unordered_map<uint64, int32> prestigeLevels;
     std::unordered_set<uint32> whitelistQuests;
