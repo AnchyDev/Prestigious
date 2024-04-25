@@ -1704,12 +1704,6 @@ void PrestigeHandler::QueueResetResendSpells(Player* player)
 
 void PrestigeHandler::QueueResetSkills(Player* player)
 {
-    // Wait for all spells to be unlearned
-    if (HasNonStarterSpells(player))
-    {
-        return;
-    }
-
     ResetSkills(player);
 
     UpdateQueueState(player, QueueState::QUEUE_RESET_ACTIONS);
