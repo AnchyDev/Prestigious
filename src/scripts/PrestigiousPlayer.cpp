@@ -64,5 +64,6 @@ void PrestigiousPlayerScript::OnEquip(Player* player, Item* /*it*/, uint8 /*bag*
     }
 
     // Avoids exploits with switching gear while menu is open
+    ClearGossipMenuFor(player);
     CloseGossipMenuFor(player);
 }
