@@ -297,6 +297,7 @@ PrestigeHandler::PrestigeHandler()
             professionMap.emplace(45360); // Inscription - Rank 4
             professionMap.emplace(45361); // Inscription - Rank 5
             professionMap.emplace(45363); // Inscription - Rank 6
+            professionMap.emplace(51005); // Inscription - Milling
         }
 
         // Jewelcrafting
