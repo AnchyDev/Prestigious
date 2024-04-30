@@ -460,6 +460,11 @@ void PrestigeHandler::ResetLevel(Player* player)
     }
 }
 
+void PrestigeHandler::ResetTalents(Player* player)
+{
+    player->resetTalents(true);
+}
+
 void PrestigeHandler::ResetSpells(Player* player)
 {
     if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
@@ -1825,6 +1830,7 @@ void PrestigeHandler::QueueResetLevel(Player* player)
     }
 
     ResetLevel(player);
+    ResetTalents(player);
 
     UpdateQueueState(player, QueueState::QUEUE_RESET_EQUIP_NEW_ITEMS);
 }

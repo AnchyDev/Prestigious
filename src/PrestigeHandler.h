@@ -63,6 +63,7 @@ public:
     void DoPrestige(Player* /*player*/, bool /*sacrificeArmor*/);
 
     void ResetLevel(Player* /*player*/);
+    void ResetTalents(Player* /*player*/);
     void ResetQuests(Player* /*player*/);
     void ResetHomebindAndPosition(Player* /*player*/);
     void ResetActionbar(Player* /*player*/);
