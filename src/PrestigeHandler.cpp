@@ -935,10 +935,15 @@ void PrestigeHandler::EquipDefaultItems(Player* player)
 {
     if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
     {
-        LOG_INFO("module.prestigious", "Pretige> Equipping defaults items..");
+        LOG_INFO("module.prestigious", "Prestige> Equipping default items..");
     }
 
     auto startOutfit = GetCharStartOutfitEntry(player->getRace(), player->getClass(), player->getGender());
+    if (!startOutfit)
+    {
+        LOG_ERROR("module.prestigious", "Failed to find start outfit for race {}, class {}, gender {} for player {}", player->getRace(), player->getClass(), player->getGender(), player->GetName());
+        return;
+    }
 
     for (uint8 i = 0; i < MAX_OUTFIT_ITEMS; ++i)
     {
