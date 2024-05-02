@@ -938,6 +938,11 @@ void PrestigeHandler::EquipDefaultItems(Player* player)
         LOG_INFO("module.prestigious", "Prestige> Equipping default items..");
     }
 
+    if(player->GetDisplayId() != player->GetNativeDisplayId())
+    {
+        player->DeMorph();
+    }
+
     auto startOutfit = GetCharStartOutfitEntry(player->getRace(), player->getClass(), player->getGender());
     if (!startOutfit)
     {
