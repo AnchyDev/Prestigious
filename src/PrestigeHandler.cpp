@@ -778,8 +778,14 @@ void PrestigeHandler::IterateItems(Player* player, bool deleteEquipped)
 
             if (sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
             {
-                SetItemFlagged(item, true);
-                flagged++;
+                if (auto itemProto = item->GetTemplate())
+                {
+                    if (itemProto->RequiredLevel < 1)
+                    {
+                        SetItemFlagged(item, true);
+                        flagged++;
+                    }
+                }
             }
 
             if (deleteEquipped)
@@ -803,8 +809,14 @@ void PrestigeHandler::IterateItems(Player* player, bool deleteEquipped)
 
             if (sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
             {
-                SetItemFlagged(item, true);
-                flagged++;
+                if (auto itemProto = item->GetTemplate())
+                {
+                    if (itemProto->RequiredLevel < 1)
+                    {
+                        SetItemFlagged(item, true);
+                        flagged++;
+                    }
+                }
             }
         }
     }
@@ -831,8 +843,14 @@ void PrestigeHandler::IterateItems(Player* player, bool deleteEquipped)
 
                 if (sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
                 {
-                    SetItemFlagged(item, true);
-                    flagged++;
+                    if (auto itemProto = item->GetTemplate())
+                    {
+                        if (itemProto->RequiredLevel < 1)
+                        {
+                            SetItemFlagged(item, true);
+                            flagged++;
+                        }
+                    }
                 }
             }
         }
@@ -851,8 +869,14 @@ void PrestigeHandler::IterateItems(Player* player, bool deleteEquipped)
                     continue;
                 }
 
-                SetItemFlagged(item, true);
-                flagged++;
+                if (auto itemProto = item->GetTemplate())
+                {
+                    if (itemProto->RequiredLevel < 1)
+                    {
+                        SetItemFlagged(item, true);
+                        flagged++;
+                    }
+                }
             }
         }
     }
@@ -870,8 +894,14 @@ void PrestigeHandler::IterateItems(Player* player, bool deleteEquipped)
 
             if (sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
             {
-                SetItemFlagged(item, true);
-                flagged++;
+                if (auto itemProto = item->GetTemplate())
+                {
+                    if (itemProto->RequiredLevel < 1)
+                    {
+                        SetItemFlagged(item, true);
+                        flagged++;
+                    }
+                }
             }
         }
     }
@@ -889,8 +919,14 @@ void PrestigeHandler::IterateItems(Player* player, bool deleteEquipped)
 
             if (sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
             {
-                SetItemFlagged(item, true);
-                flagged++;
+                if (auto itemProto = item->GetTemplate())
+                {
+                    if (itemProto->RequiredLevel < 1)
+                    {
+                        SetItemFlagged(item, true);
+                        flagged++;
+                    }
+                }
             }
         }
     }
@@ -917,8 +953,14 @@ void PrestigeHandler::IterateItems(Player* player, bool deleteEquipped)
 
                 if (sConfigMgr->GetOption<bool>("Prestigious.FlagItems", true))
                 {
-                    SetItemFlagged(item, true);
-                    flagged++;
+                    if (auto itemProto = item->GetTemplate())
+                    {
+                        if (itemProto->RequiredLevel < 1)
+                        {
+                            SetItemFlagged(item, true);
+                            flagged++;
+                        }
+                    }
                 }
             }
         }
