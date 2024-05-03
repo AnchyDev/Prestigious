@@ -554,7 +554,6 @@ void PrestigeHandler::ResetSkills(Player* player)
         return;
     }
 
-    auto maxSkillLevel = player->GetMaxSkillValueForLevel();
     std::vector<uint32> skills
     {
         SKILL_UNARMED,
@@ -729,9 +728,6 @@ void PrestigeHandler::ResetActionbar(Player* player)
 
     // Clear actions on client-side
     player->SendActionButtons(2);
-
-    // TODO: If a player is lagging this may cause problems, maybe schedule even longer.
-    auto scheduleDelay = player->GetSession()->GetLatency() * 2;
 
     if (!player || !pInfo)
     {
