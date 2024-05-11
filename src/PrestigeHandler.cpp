@@ -1038,6 +1038,19 @@ void PrestigeHandler::EquipDefaultItems(Player* player)
         player->StoreNewItemInBestSlots(itemEntry, count);
     }
 
+    auto playerInfo = sObjectMgr->GetPlayerInfo(player->getRace(), player->getClass());
+    if (!playerInfo)
+    {
+        LOG_ERROR("module.prestigious", "Failed to get player info for race {}, class {}, gender {} for player {}", player->getRace(), player->getClass(), player->getGender(), player->GetName());
+        return;
+    }
+
+    // playercreateinfo_item
+    for (auto it = playerInfo->item.begin(); it != playerInfo->item.end(); ++it)
+    {
+        player->StoreNewItemInBestSlots(it->item_id, it->item_amount);
+    }
+
     if (ammoId)
     {
         player->RemoveAmmo();
