@@ -370,6 +370,7 @@ PrestigeHandler::PrestigeHandler()
             professionMap.emplace(26797); // Tailoring - Spellfire
             professionMap.emplace(26801); // Tailoring - Shadoweave
             professionMap.emplace(26798); // Tailoring - Mooncloth
+            professionMap.emplace(59390); // Tailoring - Northern Cloth Scavenging
         }
 
         // Cooking
