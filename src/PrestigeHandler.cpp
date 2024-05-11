@@ -318,7 +318,7 @@ PrestigeHandler::PrestigeHandler()
             professionMap.emplace(3811); // Leatherworking - Rank 3
             professionMap.emplace(10662); // Leatherworking - Rank 4
             professionMap.emplace(32549); // Leatherworking - Rank 5
-            professionMap.emplace(51301); // Leatherworking - Rank 6
+            professionMap.emplace(51302); // Leatherworking - Rank 6
             professionMap.emplace(10660); // Leatherworking - Tribal
             professionMap.emplace(10658); // Leatherworking - Elemental
             professionMap.emplace(10656); // Leatherworking - Dragonscale
@@ -541,6 +541,15 @@ void PrestigeHandler::ResendRankedSpells(Player* player)
             !IsClassStarterSpell(player->getClass(), spellId))
         {
             continue;
+        }
+
+        if (!sConfigMgr->GetOption<bool>("Prestigious.Unlearn.Professions", true))
+        {
+            if (IsProfession(spellId) ||
+                IsRecipe(spellId))
+            {
+                continue;
+            }
         }
 
         player->SendLearnPacket(spellId, true);
