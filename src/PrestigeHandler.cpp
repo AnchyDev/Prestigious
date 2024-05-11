@@ -1016,6 +1016,8 @@ void PrestigeHandler::EquipDefaultItems(Player* player)
         return;
     }
 
+    std::vector<std::pair<uint32, uint32>> failedItems;
+
     uint32 ammoId = 0;
     for (uint8 i = 0; i < MAX_OUTFIT_ITEMS; ++i)
     {
@@ -1025,20 +1027,6 @@ void PrestigeHandler::EquipDefaultItems(Player* player)
             itemEntry == -1)
         {
             continue;
-        }
-
-        // Check if the item can be stored, to prevent worldserver error
-        ItemPosCountVec sDest;
-        auto result = player->CanStoreNewItem(INVENTORY_SLOT_BAG_0, NULL_SLOT, sDest, itemEntry, 1);
-
-        if (result != EQUIP_ERR_OK)
-        {
-            continue;
-        }
-
-        if (IsStarterAmmo(itemEntry))
-        {
-            ammoId = itemEntry;
         }
 
         auto iProto = sObjectMgr->GetItemTemplate(itemEntry);
@@ -1053,7 +1041,28 @@ void PrestigeHandler::EquipDefaultItems(Player* player)
             count = iProto->GetMaxStackSize();
         }
 
+        // Check if the item can be stored, to prevent worldserver error
+        ItemPosCountVec sDest;
+        auto result = player->CanStoreNewItem(INVENTORY_SLOT_BAG_0, NULL_SLOT, sDest, itemEntry, count);
+
+        if (result != EQUIP_ERR_OK)
+        {
+            failedItems.push_back(std::pair(itemEntry, count));
+            continue;
+        }
+
+        if (IsStarterAmmo(itemEntry))
+        {
+            ammoId = itemEntry;
+        }
+
         player->StoreNewItemInBestSlots(itemEntry, count);
+    }
+
+    // Send items that failed to be added due to full inventory, etc..
+    if (failedItems.size())
+    {
+        player->SendItemRetrievalMail(failedItems);
     }
 
     auto playerInfo = sObjectMgr->GetPlayerInfo(player->getRace(), player->getClass());
@@ -1987,12 +1996,6 @@ void PrestigeHandler::QueueResetNewEquipment(Player* player)
 
 void PrestigeHandler::QueueResetHomebindAndPosition(Player* player)
 {
-    // Wait for default items to be equipped first
-    if (!HasItemsEquipped(player))
-    {
-        return;
-    }
-
     ResetHomebindAndPosition(player);
 
     UpdateQueueState(player, QueueState::QUEUE_RESET_SPELLS);
