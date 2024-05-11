@@ -511,6 +511,15 @@ void PrestigeHandler::ResetSpells(Player* player)
             }
         }
 
+        // Don't unlearn mount skill
+        if (!sConfigMgr->GetOption<bool>("Prestigious.Unlearn.Mounts.Riding", false))
+        {
+            if (IsRidingSpell(spellId))
+            {
+                continue;
+            }
+        }
+
         // Don't unlearn pets
         if (!sConfigMgr->GetOption<bool>("Prestigious.Unlearn.NonCombatPet", false))
         {
@@ -598,6 +607,14 @@ void PrestigeHandler::ResetSkills(Player* player)
         }
 
         player->SetSkill(skill, 1, player->getClass() == CLASS_DEATH_KNIGHT ? 270 : 1, player->GetMaxSkillValueForLevel());
+    }
+
+    if (sConfigMgr->GetOption<bool>("Prestigious.Unlearn.Mounts.Riding", false))
+    {
+        if (player->HasSkill(SKILL_RIDING))
+        {
+            player->SetSkill(SKILL_RIDING, 0, 0, 0);
+        }
     }
 }
 
@@ -986,6 +1003,7 @@ void PrestigeHandler::EquipDefaultItems(Player* player)
         LOG_INFO("module.prestigious", "Prestige> Equipping default items..");
     }
 
+    // Morphs mess with the player gender
     if(player->GetDisplayId() != player->GetNativeDisplayId())
     {
         player->DeMorph();
@@ -1059,7 +1077,7 @@ void PrestigeHandler::EquipDefaultItems(Player* player)
 
     if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
     {
-        LOG_INFO("module.prestigious", "Pretige> Default items were equipped.");
+        LOG_INFO("module.prestigious", "Prestige> Default items were equipped.");
     }
 }
 
@@ -1205,6 +1223,21 @@ bool PrestigeHandler::IsStarterAmmo(uint32 itemId)
 {
     return itemId == 2516 || // Light Shot
         itemId == 2512; // Rough Arrow
+}
+
+bool PrestigeHandler::IsRidingSpell(uint32 spellId)
+{
+    switch (spellId)
+    {
+    case 33388: // Riding Rank 1
+    case 33391: // Riding Rank 2
+    case 34090: // Riding Rank 3
+    case 34091: // Riding Rank 4
+    case 54197: // Cold Weather Flying
+        return true;
+    }
+
+    return false;
 }
 
 bool PrestigeHandler::HasItemsEquipped(Player* player)

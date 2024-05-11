@@ -44,6 +44,15 @@ Prestigious.Unlearn.Professions = 1
 Prestigious.Unlearn.Mounts = 0
 
 #
+#   Prestigious.Unlearn.Mounts.Riding
+#        Description: Unlearns mount riding skill when prestiging.
+#        Default:     0 - Disabled
+#                     1 - Enabled
+#
+
+Prestigious.Unlearn.Mounts.Riding = 0
+
+#
 #   Prestigious.Unlearn.NonCombatPet
 #        Description: Unlearns non-combat pets when prestiging.
 #        Default:     0 - Disabled
