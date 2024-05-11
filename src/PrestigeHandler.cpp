@@ -998,6 +998,7 @@ void PrestigeHandler::EquipDefaultItems(Player* player)
         return;
     }
 
+    uint32 ammoId = 0;
     for (uint8 i = 0; i < MAX_OUTFIT_ITEMS; ++i)
     {
         auto itemEntry = startOutfit->ItemId[i];
@@ -1017,7 +1018,30 @@ void PrestigeHandler::EquipDefaultItems(Player* player)
             continue;
         }
 
-        player->StoreNewItemInBestSlots(itemEntry, 1);
+        if (IsStarterAmmo(itemEntry))
+        {
+            ammoId = itemEntry;
+        }
+
+        auto iProto = sObjectMgr->GetItemTemplate(itemEntry);
+        if (!iProto)
+        {
+            continue;
+        }
+
+        uint32 count = iProto->BuyCount;
+        if (count > iProto->GetMaxStackSize())
+        {
+            count = iProto->GetMaxStackSize();
+        }
+
+        player->StoreNewItemInBestSlots(itemEntry, count);
+    }
+
+    if (ammoId)
+    {
+        player->RemoveAmmo();
+        player->SetAmmo(ammoId);
     }
 
     if (sConfigMgr->GetOption<bool>("Prestigious.Debug", false))
@@ -1162,6 +1186,12 @@ bool PrestigeHandler::IsNonCombatPet(uint32 spellId)
     }
 
     return true;
+}
+
+bool PrestigeHandler::IsStarterAmmo(uint32 itemId)
+{
+    return itemId == 2516 || // Light Shot
+        itemId == 2512; // Rough Arrow
 }
 
 bool PrestigeHandler::HasItemsEquipped(Player* player)
