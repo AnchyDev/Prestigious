@@ -130,8 +130,8 @@ PrestigeHandler::PrestigeHandler()
             107, // Block
                 81, // Dodge
 
-                635, // Holy Light
-                21084, // Seal of Righteousness
+                    635, // Holy Light
+                    21084, // Seal of Righteousness
         });
 
         spellMap.emplace(CLASS_HUNTER, std::unordered_set<uint32>{
@@ -225,6 +225,12 @@ PrestigeHandler::PrestigeHandler()
                 49576, // Death Grip
                 45462, // Plague Strike
         });
+    }
+
+    // Generic Spells
+    {
+        genericSpellMap.emplace(3365); // Opening
+        genericSpellMap.emplace(2382); // Generic
     }
 
     // Professions
@@ -489,6 +495,11 @@ void PrestigeHandler::ResetSpells(Player* player)
         {
             // Send the unlearn packet and re-learn them after.
             player->SendLearnPacket(spellId, false);
+            continue;
+        }
+
+        if (IsGenericSpell(spellId))
+        {
             continue;
         }
 
@@ -1122,6 +1133,11 @@ bool PrestigeHandler::IsClassStarterSpell(uint32 pClass, uint32 spellId)
     }
 
     return true;
+}
+
+bool PrestigeHandler::IsGenericSpell(uint32 spellId)
+{
+    return genericSpellMap.find(spellId) != genericSpellMap.end();
 }
 
 bool PrestigeHandler::IsProfession(uint32 spellId)

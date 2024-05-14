@@ -80,6 +80,7 @@ public:
 
     bool IsRacialSpell(uint32 /*race*/, uint32 /*spellId*/);
     bool IsClassStarterSpell(uint32 /*class*/, uint32 /*spellId*/);
+    bool IsGenericSpell(uint32 /*spellId*/);
 
     bool IsProfession(uint32 /*spellId*/);
     bool IsRecipe(uint32 /*spellId*/);
@@ -136,6 +137,7 @@ public:
     TaskScheduler* GetScheduler();
 
 private:
+    std::unordered_set<uint32> genericSpellMap;
     std::unordered_map<Races, std::unordered_set<uint32>> racialMap;
     std::unordered_map<Classes, std::unordered_set<uint32>> spellMap;
     std::unordered_set<uint32> professionMap;
